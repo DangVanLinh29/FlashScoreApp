@@ -50,4 +50,8 @@
         <item name="android:layout_centerVertical">true</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
+    <style name="Theme.FlashScoreApp.NoActionBar" parent="Theme.FlashScoreApp">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>

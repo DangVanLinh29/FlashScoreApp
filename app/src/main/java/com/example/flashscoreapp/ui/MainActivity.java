@@ -19,6 +19,7 @@ import com.example.flashscoreapp.ui.settings.SettingsActivity;
 import com.example.flashscoreapp.ui.settings.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import android.content.Intent;
+import com.example.flashscoreapp.ui.search.SearchActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -101,19 +102,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Xử lý sự kiện khi nhấn vào các nút trên Toolbar
         int itemId = item.getItemId();
         if (itemId == R.id.action_search) {
-            Toast.makeText(this, "Nút Tìm kiếm được nhấn", Toast.LENGTH_SHORT).show();
-            // TODO: Thêm logic tìm kiếm ở đây
+            // MỞ SEARCH ACTIVITY
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent);
             return true;
         } else if (itemId == R.id.action_settings) {
-
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return true;
-
         }
         return super.onOptionsItemSelected(item);
     }

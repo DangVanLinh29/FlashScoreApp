@@ -6,6 +6,7 @@ import com.example.flashscoreapp.data.model.remote.ApiResponse;
 import com.example.flashscoreapp.data.model.remote.ApiStandingsResponse;
 import com.example.flashscoreapp.data.model.remote.ApiStatisticsResponse;
 import com.example.flashscoreapp.data.model.remote.ApiTopScorerData;
+import com.example.flashscoreapp.data.model.remote.ApiTeamResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -77,4 +78,19 @@ public interface ApiService {
             @Header("x-rapidapi-key") String apiKey,
             @Header("x-rapidapi-host") String apiHost
     );
+    @GET("teams")
+    Call<ApiResponse<ApiTeamResponse>> searchTeams(
+            @Query("search") String name,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+
+    @GET("leagues")
+    Call<ApiLeaguesResponse> searchLeagues(
+            @Query("search") String name,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+
+
 }

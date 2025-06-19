@@ -29,6 +29,9 @@ import com.example.flashscoreapp.data.model.remote.ApiStatisticItem;
 import com.example.flashscoreapp.data.model.remote.ApiStatisticsResponse;
 import com.example.flashscoreapp.data.model.remote.ApiTeamStatistics;
 import com.example.flashscoreapp.data.model.remote.ApiTopScorerData;
+import com.example.flashscoreapp.data.model.remote.ApiTeamResponse;
+import com.example.flashscoreapp.data.model.remote.ApiTeamInfo;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,7 +53,7 @@ public class MatchRepository {
     private final MatchDao matchDao;
     private final TeamDao teamDao;
     private final ExecutorService executorService;
-    private final String API_KEY = "9603cad7a8mshaf2d58ef107a002p1f7706jsn62cf5be4f1d5";
+    private final String API_KEY = "5acb3c9129msh55387e600567f2fp11700djsnc70a2511d9c5";
     private final String API_HOST = "api-football-v1.p.rapidapi.com";
 
     public MatchRepository(Application application) {
@@ -363,4 +366,55 @@ public class MatchRepository {
         });
         return data;
     }
+    public LiveData<List<Team>> searchTeams(String name) {
+        final MutableLiveData<List<Team>> data = new MutableLiveData<>();
+        apiService.searchTeams(name, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiTeamResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ApiTeamResponse>> call, Response<ApiResponse<ApiTeamResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Team> teams = new ArrayList<>();
+                    for (ApiTeamResponse apiTeamResponse : response.body().getResponse()) {
+                        ApiTeamInfo teamInfo = apiTeamResponse.getTeam();
+                        if (teamInfo != null) {
+                            teams.add(new Team(
+                                    teamInfo.getId(),
+                                    teamInfo.getName(),
+                                    teamInfo.getLogo()
+                            ));
+                        }
+                    }
+                    data.postValue(teams);
+                } else {
+                    data.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<ApiTeamResponse>> call, Throwable t) {
+                data.postValue(null);
+            }
+        });
+        return data;
+    }
+
+    public LiveData<List<ApiLeagueData>> searchLeagues(String name) {
+        final MutableLiveData<List<ApiLeagueData>> data = new MutableLiveData<>();
+        apiService.searchLeagues(name, API_KEY, API_HOST).enqueue(new Callback<ApiLeaguesResponse>() {
+            @Override
+            public void onResponse(Call<ApiLeaguesResponse> call, Response<ApiLeaguesResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    data.postValue(response.body().getResponse());
+                } else {
+                    data.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiLeaguesResponse> call, Throwable t) {
+                data.postValue(null);
+            }
+        });
+        return data;
+    }
+
 }
