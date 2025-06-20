@@ -18,6 +18,7 @@ import com.example.flashscoreapp.ui.home.HomeViewModel;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import java.util.Calendar;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,72 +34,87 @@ public class MatchDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match_details);
 
-        Toolbar toolbar = findViewById(R.id.toolbar_details);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
-
-
+        // Lấy dữ liệu trận đấu từ Intent
         match = (Match) getIntent().getSerializableExtra("EXTRA_MATCH");
-        if (match == null) {
-            Toast.makeText(this, "Lỗi: không có dữ liệu trận đấu", Toast.LENGTH_SHORT).show();
+
+        // --- SỬA LỖI TẠI ĐÂY ---
+        // Bao bọc toàn bộ logic xử lý vào trong một khối kiểm tra null
+        if (match != null) {
+            // Nếu match không null, thì mới thực hiện tất cả các công việc còn lại
+
+            // 1. Setup Toolbar và đặt tiêu đề động
+            Toolbar toolbar = findViewById(R.id.toolbar_details);
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowHomeEnabled(true);
+                if (match.getLeague() != null && match.getLeague().getName() != null) {
+                    getSupportActionBar().setTitle(match.getLeague().getName());
+                } else {
+                    getSupportActionBar().setTitle("Chi tiết trận đấu"); // Tên mặc định
+                }
+            }
+
+            // 2. Lấy năm của mùa giải một cách an toàn
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(match.getMatchTime());
+            int seasonYear = calendar.get(Calendar.YEAR);
+
+            // 3. Khởi tạo ViewModelFactory và ViewModel
+            MatchDetailsViewModelFactory factory = new MatchDetailsViewModelFactory(
+                    getApplication(),
+                    match.getMatchId(),
+                    match.getHomeTeam().getId(),
+                    match.getAwayTeam().getId(),
+                    seasonYear
+            );
+            viewModel = new ViewModelProvider(this, factory).get(MatchDetailsViewModel.class);
+            homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
+            // 4. Ánh xạ và cập nhật các View
+            favoriteIconHome = findViewById(R.id.image_favorite_home);
+            favoriteIconAway = findViewById(R.id.image_favorite_away);
+            updateScoreboard();
+
+            // 5. Cài đặt ViewPager
+            ViewPager2 viewPager = findViewById(R.id.view_pager_match_details);
+            TabLayout tabLayout = findViewById(R.id.tab_layout_match_details);
+            viewPager.setAdapter(new MatchDetailsPagerAdapter(this, match.getLeague().getId(), seasonYear));
+            new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+                switch (position) {
+                    case 0: tab.setText("TÓM TẮT"); break;
+                    case 1: tab.setText("SỐ LIỆU"); break;
+                    case 2: tab.setText("ĐỘI HÌNH"); break;
+                    case 3: tab.setText("ĐỐI ĐẦU"); break;
+                    case 4: tab.setText("BẢNG XẾP HẠNG"); break;
+                }
+            }).attach();
+
+            // 6. Lắng nghe và cài đặt các sự kiện
+            observeFavoriteStatus();
+            favoriteIconHome.setOnClickListener(v -> {
+                Team homeTeam = match.getHomeTeam();
+                if (isHomeFavorite) {
+                    homeViewModel.removeFavoriteTeam(homeTeam);
+                } else {
+                    homeViewModel.addFavoriteTeam(homeTeam);
+                }
+            });
+
+            favoriteIconAway.setOnClickListener(v -> {
+                Team awayTeam = match.getAwayTeam();
+                if (isAwayFavorite) {
+                    homeViewModel.removeFavoriteTeam(awayTeam);
+                } else {
+                    homeViewModel.addFavoriteTeam(awayTeam);
+                }
+            });
+
+        } else {
+            // Nếu match là null ngay từ đầu, hiển thị thông báo và đóng Activity
+            Toast.makeText(this, "Lỗi: Không thể tải dữ liệu trận đấu.", Toast.LENGTH_SHORT).show();
             finish();
-            return;
         }
-
-        // ======================= SỬA LỖI TẠI ĐÂY =======================
-        // Khởi tạo Factory với đủ 4 tham số: application, matchId, homeId, awayId
-        MatchDetailsViewModelFactory factory = new MatchDetailsViewModelFactory(
-                getApplication(),
-                match.getMatchId(),
-                match.getHomeTeam().getId(),
-                match.getAwayTeam().getId()
-        );
-        viewModel = new ViewModelProvider(this, factory).get(MatchDetailsViewModel.class);
-        // ===============================================================
-
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-
-        // Ánh xạ các biểu tượng yêu thích
-        favoriteIconHome = findViewById(R.id.image_favorite_home);
-        favoriteIconAway = findViewById(R.id.image_favorite_away);
-        updateScoreboard();
-
-        ViewPager2 viewPager = findViewById(R.id.view_pager_match_details);
-        TabLayout tabLayout = findViewById(R.id.tab_layout_match_details);
-        viewPager.setAdapter(new MatchDetailsPagerAdapter(this));
-
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            switch (position) {
-                case 0: tab.setText("TÓM TẮT"); break;
-                case 1: tab.setText("SỐ LIỆU"); break;
-                case 2: tab.setText("ĐỘI HÌNH"); break;
-                case 3: tab.setText("ĐỐI ĐẦU"); break;
-                case 4: tab.setText("BẢNG XẾP HẠNG"); break;
-            }
-        }).attach();
-        observeFavoriteStatus();
-
-        favoriteIconHome.setOnClickListener(v -> {
-            Team homeTeam = match.getHomeTeam();
-            if (isHomeFavorite) {
-                homeViewModel.removeFavoriteTeam(homeTeam);
-            } else {
-                homeViewModel.addFavoriteTeam(homeTeam);
-            }
-        });
-
-        favoriteIconAway.setOnClickListener(v -> {
-            Team awayTeam = match.getAwayTeam();
-            if (isAwayFavorite) {
-                homeViewModel.removeFavoriteTeam(awayTeam);
-            } else {
-                homeViewModel.addFavoriteTeam(awayTeam);
-            }
-        });
-
     }
 
     private void updateScoreboard() {

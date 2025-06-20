@@ -13,7 +13,9 @@ import com.example.flashscoreapp.data.model.domain.RoundHeader;
 import com.example.flashscoreapp.ui.home.MatchAdapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_HEADER = 0;
@@ -21,6 +23,8 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private List<Object> items = new ArrayList<>();
     private MatchAdapter.OnItemClickListener matchClickListener;
+    // Thêm Set để lưu ID các trận yêu thích
+    private Set<Integer> favoriteMatchIds = new HashSet<>();
 
     public void setOnItemClickListener(MatchAdapter.OnItemClickListener listener) {
         this.matchClickListener = listener;
@@ -29,6 +33,13 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @SuppressLint("NotifyDataSetChanged")
     public void setItems(List<Object> items) {
         this.items = items;
+        notifyDataSetChanged();
+    }
+
+    // Thêm hàm này để nhận danh sách yêu thích từ Fragment
+    @SuppressLint("NotifyDataSetChanged")
+    public void setFavoriteMatchIds(Set<Integer> favoriteMatchIds) {
+        this.favoriteMatchIds = favoriteMatchIds;
         notifyDataSetChanged();
     }
 
@@ -47,7 +58,7 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (viewType == TYPE_HEADER) {
             View view = inflater.inflate(R.layout.item_round_header, parent, false);
             return new HeaderViewHolder(view);
-        } else { // TYPE_MATCH
+        } else {
             View view = inflater.inflate(R.layout.item_match, parent, false);
             return new MatchAdapter.MatchViewHolder(view);
         }
@@ -61,13 +72,10 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else {
             MatchAdapter.MatchViewHolder matchViewHolder = (MatchAdapter.MatchViewHolder) holder;
             Match match = (Match) items.get(position);
-            matchViewHolder.bind(match, false); // Tạm thời không xử lý yêu thích ở đây
-
-            holder.itemView.setOnClickListener(v -> {
-                if (matchClickListener != null) {
-                    matchClickListener.onItemClick(match);
-                }
-            });
+            // Kiểm tra xem trận đấu này có trong danh sách yêu thích không
+            boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
+            // Gọi hàm bind với trạng thái isFavorite chính xác
+            matchViewHolder.bind(match, isFavorite, matchClickListener);
         }
     }
 
@@ -76,7 +84,6 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return items.size();
     }
 
-    // ViewHolder cho Tiêu đề
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         private final TextView textRoundName;
         public HeaderViewHolder(@NonNull View itemView) {

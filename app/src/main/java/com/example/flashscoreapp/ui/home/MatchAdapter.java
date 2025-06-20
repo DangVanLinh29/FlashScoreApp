@@ -1,21 +1,22 @@
 package com.example.flashscoreapp.ui.home;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.Match;
-import com.example.flashscoreapp.data.model.domain.Score;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -48,21 +49,7 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
     public void onBindViewHolder(@NonNull MatchViewHolder holder, int position) {
         Match match = matches.get(position);
         boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
-        holder.bind(match, isFavorite);
-
-        // --- QUAN TRỌNG: XỬ LÝ SỰ KIỆN CLICK Ở ĐÂY ---
-        // Vì onBindViewHolder không phải static, nó có thể truy cập 'listener'
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(match);
-            }
-        });
-
-        holder.imageViewFavorite.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onFavoriteClick(match, isFavorite);
-            }
-        });
+        holder.bind(match, isFavorite, listener);
     }
 
     @Override
@@ -83,68 +70,82 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
     }
 
     public static class MatchViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textViewStatus, textViewLeague, textViewHomeTeam, textViewAwayTeam, textViewScore;
-        private final ImageView imageViewHomeLogo, imageViewAwayLogo;
-        public final ImageView imageViewFavorite;
+        private final TextView textLeft, textRight, textHomeName, textAwayName;
+        private final ImageView imageHomeLogo, imageAwayLogo, imageViewFavorite;
 
         public MatchViewHolder(@NonNull View itemView) {
             super(itemView);
-            textViewStatus = itemView.findViewById(R.id.text_view_status);
-            textViewLeague = itemView.findViewById(R.id.text_view_league);
-            textViewHomeTeam = itemView.findViewById(R.id.text_view_home_team);
-            textViewAwayTeam = itemView.findViewById(R.id.text_view_away_team);
-            textViewScore = itemView.findViewById(R.id.text_view_score);
-            imageViewHomeLogo = itemView.findViewById(R.id.image_view_home_logo);
-            imageViewAwayLogo = itemView.findViewById(R.id.image_view_away_logo);
+            textLeft = itemView.findViewById(R.id.text_left_column);
+            textRight = itemView.findViewById(R.id.text_right_column);
+            textHomeName = itemView.findViewById(R.id.text_home_team_name);
+            textAwayName = itemView.findViewById(R.id.text_away_team_name);
+            imageHomeLogo = itemView.findViewById(R.id.image_home_logo);
+            imageAwayLogo = itemView.findViewById(R.id.image_away_logo);
             imageViewFavorite = itemView.findViewById(R.id.image_view_favorite);
-
         }
 
-        public void bind(Match match, boolean isFavorite) {
-            textViewStatus.setText(match.getStatus());
+        public void bind(final Match match, final boolean isFavorite, final OnItemClickListener listener) {
+            // Binding team info
+            textHomeName.setText(match.getHomeTeam().getName());
+            textAwayName.setText(match.getAwayTeam().getName());
+            Glide.with(itemView.getContext()).load(match.getHomeTeam().getLogoUrl()).placeholder(R.drawable.ic_leagues_24).into(imageHomeLogo);
+            Glide.with(itemView.getContext()).load(match.getAwayTeam().getLogoUrl()).placeholder(R.drawable.ic_leagues_24).into(imageAwayLogo);
 
-            if(match.getLeague() != null) textViewLeague.setText(match.getLeague().getName());
-            if(match.getHomeTeam() != null) textViewHomeTeam.setText(match.getHomeTeam().getName());
-            if(match.getAwayTeam() != null) textViewAwayTeam.setText(match.getAwayTeam().getName());
+            // Logic hiển thị Cột Trái và Phải
+            String status = match.getStatus();
+            int secondaryColor = ContextCompat.getColor(itemView.getContext(), R.color.season_date_text);
+            int primaryColor = ContextCompat.getColor(itemView.getContext(), R.color.black);
+            textLeft.setTextColor(secondaryColor);
+            textRight.setTextColor(primaryColor);
+            textRight.setTextSize(16f);
 
-            if ("NS".equals(match.getStatus())) { // "Not Started"
-                // Kiểm tra xem trận đấu có phải là hôm nay không
-                Calendar matchCal = Calendar.getInstance();
-                matchCal.setTimeInMillis(match.getMatchTime());
-                Calendar todayCal = Calendar.getInstance();
-                boolean isToday = todayCal.get(Calendar.YEAR) == matchCal.get(Calendar.YEAR) &&
-                        todayCal.get(Calendar.DAY_OF_YEAR) == matchCal.get(Calendar.DAY_OF_YEAR);
-
-                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-                timeFormat.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
-                String timeStr = timeFormat.format(new Date(match.getMatchTime()));
-
-                if (!isToday) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM", Locale.getDefault());
-                    String dateStr = dateFormat.format(new Date(match.getMatchTime()));
-                    textViewScore.setText(dateStr + "\n" + timeStr); // Hiển thị dạng "dd.MM" và giờ ở dòng dưới
-                    textViewScore.setTextSize(14f); // Giảm kích thước chữ cho phù hợp
-                } else {
-                    textViewScore.setText(timeStr); // Nếu là hôm nay, chỉ hiển thị giờ
-                    textViewScore.setTextSize(20f);
-                }
+            if ("NS".equalsIgnoreCase(status)) {
+                Date matchDate = new Date(match.getMatchTime());
+                textLeft.setText(new SimpleDateFormat("dd.MM.", Locale.getDefault()).format(matchDate));
+                textRight.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(matchDate));
+                textRight.setTextSize(14f);
+                textRight.setTextColor(secondaryColor);
+            } else if (status != null && (status.equals("1H") || status.equals("2H") || status.equals("HT") || status.contains("'"))) {
+                textLeft.setText(status);
+                textLeft.setTextColor(Color.RED);
+                textRight.setText(match.getScore().getHome() + " - " + match.getScore().getAway());
             } else {
-                Score score = match.getScore();
-                if(score != null) {
-                    String scoreText = score.getHome() + " - " + score.getAway();
-                    textViewScore.setText(scoreText);
-                    textViewScore.setTextSize(20f);
-                }
+                textLeft.setText(status);
+                textRight.setText(match.getScore().getHome() + " - " + match.getScore().getAway());
             }
 
-            if(match.getHomeTeam() != null) Glide.with(itemView.getContext()).load(match.getHomeTeam().getLogoUrl()).placeholder(R.drawable.ic_leagues_24).error(R.drawable.ic_settings_24).into(imageViewHomeLogo);
-            if(match.getAwayTeam() != null) Glide.with(itemView.getContext()).load(match.getAwayTeam().getLogoUrl()).placeholder(R.drawable.ic_leagues_24).error(R.drawable.ic_settings_24).into(imageViewAwayLogo);
+            // Gán sự kiện click cho cả item
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onItemClick(match);
+                }
+            });
 
-            if (isFavorite) {
-                imageViewFavorite.setImageResource(R.drawable.ic_star_filled);
+            // --- BẮT ĐẦU SỬA ĐỔI ---
+            // Thêm logic ẩn/hiện nút yêu thích dựa trên trạng thái trận đấu
+            if (isStatusFinished(status)) {
+                // Nếu trận đấu đã kết thúc, ẩn nút sao
+                imageViewFavorite.setVisibility(View.GONE);
+                imageViewFavorite.setOnClickListener(null); // Bỏ sự kiện click để đảm bảo
             } else {
-                imageViewFavorite.setImageResource(R.drawable.ic_star_empty);
+                // Nếu trận đấu chưa kết thúc hoặc đang diễn ra, hiển thị nút sao
+                imageViewFavorite.setVisibility(View.VISIBLE);
+                imageViewFavorite.setImageResource(isFavorite ? R.drawable.ic_star_filled : R.drawable.ic_star_empty);
+                // Gán sự kiện click cho nút sao
+                imageViewFavorite.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onFavoriteClick(match, isFavorite);
+                    }
+                });
             }
+            // --- KẾT THÚC SỬA ĐỔI ---
+        }
+
+        private boolean isStatusFinished(String status) {
+            if (status == null) return false;
+            // Các trạng thái được coi là đã kết thúc
+            List<String> finishedStatuses = Arrays.asList("FT", "AET", "PEN", "PST", "CANC", "ABD", "AWD", "WO");
+            return finishedStatuses.contains(status);
         }
     }
 }

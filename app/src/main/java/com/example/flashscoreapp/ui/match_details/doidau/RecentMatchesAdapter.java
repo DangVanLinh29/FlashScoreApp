@@ -13,7 +13,6 @@ import com.example.flashscoreapp.data.model.domain.Match;
 import com.example.flashscoreapp.ui.home.MatchAdapter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 public class RecentMatchesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -21,7 +20,8 @@ public class RecentMatchesAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_MATCH = 1;
 
     private List<Object> items = new ArrayList<>();
-    private MatchAdapter.OnItemClickListener listener;
+    // Sửa tên biến cho rõ ràng hơn
+    private MatchAdapter.OnItemClickListener matchClickListener;
 
     @SuppressLint("NotifyDataSetChanged")
     public void setItems(List<Object> items) {
@@ -30,7 +30,7 @@ public class RecentMatchesAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public void setOnItemClickListener(MatchAdapter.OnItemClickListener listener) {
-        this.listener = listener;
+        this.matchClickListener = listener;
     }
 
     @Override
@@ -49,7 +49,9 @@ public class RecentMatchesAdapter extends RecyclerView.Adapter<RecyclerView.View
             View view = inflater.inflate(R.layout.item_group_header, parent, false);
             return new HeaderViewHolder(view);
         } else {
+            // Dùng layout item_match đã được cập nhật
             View view = inflater.inflate(R.layout.item_match, parent, false);
+            // Trả về ViewHolder chung từ MatchAdapter
             return new MatchAdapter.MatchViewHolder(view);
         }
     }
@@ -59,16 +61,13 @@ public class RecentMatchesAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (holder.getItemViewType() == TYPE_HEADER) {
             ((HeaderViewHolder) holder).bind((String) items.get(position));
         } else {
+            // --- SỬA LỖI TẠI ĐÂY ---
             MatchAdapter.MatchViewHolder matchViewHolder = (MatchAdapter.MatchViewHolder) holder;
             Match match = (Match) items.get(position);
-            // Không cần xử lý sao yêu thích ở đây
-            matchViewHolder.bind(match, false);
 
-            holder.itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onItemClick(match);
-                }
-            });
+            // Gọi hàm bind với đủ 3 tham số, bao gồm cả listener.
+            // isFavorite là false vì đây là danh sách các trận gần đây, không phải danh sách yêu thích.
+            matchViewHolder.bind(match, false, matchClickListener);
         }
     }
 

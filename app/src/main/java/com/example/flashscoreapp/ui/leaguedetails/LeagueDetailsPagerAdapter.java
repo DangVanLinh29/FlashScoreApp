@@ -26,15 +26,16 @@ public class LeagueDetailsPagerAdapter extends FragmentStateAdapter {
 
         switch (position) {
             case 0:
-                // Tab Bảng xếp hạng (chứa các tab con) cần `seasonYear`
+                // Tab Bảng xếp hạng
                 return StandingsContainerFragment.newInstance(leagueId, seasonYear);
             case 1:
-                // SỬA Ở ĐÂY: Tab Kết quả cũng cần `seasonYear`
+                // Tab Kết quả
                 return ResultsTabFragment.newInstance(leagueId, seasonYear);
             case 2:
-                return new FixturesTabFragment(); // Tab Lịch thi đấu (tạm thời)
+                // SỬA TẠI ĐÂY:
+                // Tab Lịch thi đấu cũng cần leagueId và seasonYear
+                return FixturesTabFragment.newInstance(leagueId, seasonYear);
             default:
-                // Mặc định trả về Fragment rỗng để tránh crash nếu getItemCount > 3
                 return new Fragment();
         }
     }

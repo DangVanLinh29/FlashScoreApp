@@ -108,9 +108,15 @@ public class LeagueDetailsFragment extends Fragment {
         }
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
-                case 0: tab.setText("BẢNG XẾP HẠNG"); break;
-                case 1: tab.setText("KẾT QUẢ"); break;
-                case 2: tab.setText("LỊCH THI ĐẤU"); break;
+                case 0:
+                    tab.setText("BẢNG XẾP HẠNG");
+                    break;
+                case 1:
+                    tab.setText("KẾT QUẢ");
+                    break;
+                case 2:
+                    tab.setText("LỊCH THI ĐẤU");
+                    break;
             }
         }).attach();
     }

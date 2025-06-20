@@ -21,7 +21,7 @@ import com.example.flashscoreapp.data.model.domain.StandingItem;
 import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.data.model.local.FavoriteMatch;
 import com.example.flashscoreapp.data.model.local.FavoriteTeam;
-import com.example.flashscoreapp.data.model.remote.*; // Import gọn hơn
+import com.example.flashscoreapp.data.model.remote.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -455,41 +455,47 @@ public class MatchRepository {
         return data;
     }
 
-    public LiveData<List<ApiPlayerResponse>> getPlayersForTeam(int teamId) {
+    // Sửa lại hàm này
+    public LiveData<List<ApiPlayerResponse>> getPlayersForTeam(int teamId, int season) {
         final MutableLiveData<List<ApiPlayerResponse>> data = new MutableLiveData<>();
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
-        // Thử với năm hiện tại trước
-        apiService.getPlayersForTeam(teamId, currentYear, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiPlayerResponse>>() {
+        // Không dùng năm hiện tại nữa, mà dùng season được truyền vào
+        apiService.getPlayersForTeam(teamId, season, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiPlayerResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<ApiPlayerResponse>> call, Response<ApiResponse<ApiPlayerResponse>> response) {
-                // Nếu thành công và có dữ liệu
                 if (response.isSuccessful() && response.body() != null && !response.body().getResponse().isEmpty()) {
                     data.postValue(response.body().getResponse());
                 } else {
-                    // Nếu không có dữ liệu, thử lại với năm trước đó
-                    Log.d("MatchRepository", "Không tìm thấy cầu thủ cho đội " + teamId + " mùa " + currentYear + ". Thử lại với mùa trước.");
-                    apiService.getPlayersForTeam(teamId, currentYear - 1, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiPlayerResponse>>() {
-                        @Override
-                        public void onResponse(Call<ApiResponse<ApiPlayerResponse>> call2, Response<ApiResponse<ApiPlayerResponse>> response2) {
-                            if (response2.isSuccessful() && response2.body() != null) {
-                                data.postValue(response2.body().getResponse());
-                            } else {
-                                data.postValue(null); // Cả 2 lần đều thất bại
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<ApiResponse<ApiPlayerResponse>> call2, Throwable t2) {
-                            data.postValue(null); // Lỗi mạng ở lần 2
-                        }
-                    });
+                    // Nếu không tìm thấy, không cần thử lại năm trước nữa vì chúng ta đã có season cụ thể
+                    data.postValue(new ArrayList<>()); // Trả về danh sách rỗng
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse<ApiPlayerResponse>> call, Throwable t) {
-                data.postValue(null); // Lỗi mạng ở lần 1
+                data.postValue(null);
+            }
+        });
+        return data;
+    }
+
+    public LiveData<List<Match>> getFixturesForLeague(int leagueId, int season) {
+        MutableLiveData<List<Match>> data = new MutableLiveData<>();
+        apiService.getFixturesByLeagueAndSeason(leagueId, season, "NS", API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiMatch>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ApiMatch>> call, Response<ApiResponse<ApiMatch>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    // SỬA Ở ĐÂY: Chuyển đổi dữ liệu ngay tại Repository
+                    List<Match> domainMatches = convertApiMatchesToDomain(response.body().getResponse());
+                    data.postValue(domainMatches);
+                } else {
+                    data.postValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<ApiMatch>> call, Throwable t) {
+                data.postValue(null);
             }
         });
         return data;

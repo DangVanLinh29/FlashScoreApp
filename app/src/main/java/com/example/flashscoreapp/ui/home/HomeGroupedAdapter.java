@@ -60,7 +60,9 @@ public class HomeGroupedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             View view = inflater.inflate(R.layout.item_league_header, parent, false);
             return new LeagueHeaderViewHolder(view);
         } else {
+            // SỬA Ở ĐÂY: Dùng layout item_match đã được cập nhật
             View view = inflater.inflate(R.layout.item_match, parent, false);
+            // Trả về ViewHolder chung từ MatchAdapter
             return new MatchAdapter.MatchViewHolder(view);
         }
     }
@@ -70,17 +72,12 @@ public class HomeGroupedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder.getItemViewType() == TYPE_LEAGUE_HEADER) {
             ((LeagueHeaderViewHolder) holder).bind((League) displayList.get(position));
         } else {
+            // --- TOÀN BỘ LOGIC CŨ ĐƯỢC THAY THẾ BẰNG 4 DÒNG NÀY ---
             MatchAdapter.MatchViewHolder matchViewHolder = (MatchAdapter.MatchViewHolder) holder;
             Match match = (Match) displayList.get(position);
             boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
-            matchViewHolder.bind(match, isFavorite);
-
-            holder.itemView.setOnClickListener(v -> {
-                if (listener != null) listener.onItemClick(match);
-            });
-            matchViewHolder.imageViewFavorite.setOnClickListener(v -> {
-                if (listener != null) listener.onFavoriteClick(match, isFavorite);
-            });
+            // Gọi hàm bind với đủ 3 tham số, bao gồm cả listener
+            matchViewHolder.bind(match, isFavorite, listener);
         }
     }
 

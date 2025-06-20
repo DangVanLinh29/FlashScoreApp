@@ -43,7 +43,7 @@ public interface ApiService {
             @Header("x-rapidapi-host") String apiHost
     );
 
-    // Các phương thức còn lại giữ nguyên cấu trúc cũ của chúng
+
     @GET("fixtures/statistics")
     Call<ApiStatisticsResponse> getMatchStatistics(
             @Query("fixture") int fixtureId,
@@ -111,6 +111,15 @@ public interface ApiService {
     Call<ApiResponse<ApiPlayerResponse>> getPlayersForTeam(
             @Query("team") int teamId,
             @Query("season") int season,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+
+    @GET("fixtures")
+    Call<ApiResponse<ApiMatch>> getFixturesByLeagueAndSeason(
+            @Query("league") int leagueId,
+            @Query("season") int season,
+            @Query("status") String status, // Thêm tham số status
             @Header("x-rapidapi-key") String apiKey,
             @Header("x-rapidapi-host") String apiHost
     );

@@ -1,36 +1,39 @@
 package com.example.flashscoreapp.ui.match_details.lineups;
 
 import android.os.Bundle;
-import android.util.Log; // THÊM IMPORT NÀY
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.flashscoreapp.R;
-import com.example.flashscoreapp.data.model.remote.ApiDetailedPlayerInfo;
-import com.example.flashscoreapp.data.model.remote.ApiLineup;
-import com.example.flashscoreapp.data.model.remote.ApiPlayerResponse;
+import com.example.flashscoreapp.data.model.domain.LineupDisplayData;
+import com.example.flashscoreapp.data.model.domain.PlayerDisplay;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsViewModel;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class LineupsFragment extends Fragment {
-    // Tag để lọc log cho dễ
-    private static final String TAG = "LineupsFragmentDebug";
+    private static final String TAG = "LineupsFragment";
 
     private MatchDetailsViewModel viewModel;
-    private TextView homeTeamName, awayTeamName;
-    private RecyclerView homeStartersRecycler, homeSubsRecycler, awayStartersRecycler, awaySubsRecycler;
-    private LineupPlayerAdapter homeStartersAdapter, homeSubsAdapter, awayStartersAdapter, awaySubsAdapter;
+    private TextView homeTeamName, awayTeamName, homeFormation, awayFormation;
+    private RecyclerView homeSubsRecycler, awaySubsRecycler;
+    private LineupPlayerAdapter homeSubsAdapter, awaySubsAdapter;
+    private ConstraintLayout pitchLayoutHome, pitchLayoutAway;
 
     @Nullable
     @Override
@@ -42,108 +45,164 @@ public class LineupsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Ánh xạ views
         homeTeamName = view.findViewById(R.id.text_home_team_name);
         awayTeamName = view.findViewById(R.id.text_away_team_name);
+        homeFormation = view.findViewById(R.id.text_home_formation);
+        awayFormation = view.findViewById(R.id.text_away_formation);
+        pitchLayoutHome = view.findViewById(R.id.pitch_layout_home);
+        pitchLayoutAway = view.findViewById(R.id.pitch_layout_away);
+        homeSubsRecycler = view.findViewById(R.id.recycler_home_subs);
+        awaySubsRecycler = view.findViewById(R.id.recycler_away_subs);
 
-        setupRecyclerViews(view);
+        setupRecyclerViews();
 
         viewModel = new ViewModelProvider(requireActivity()).get(MatchDetailsViewModel.class);
 
-        // Lắng nghe dữ liệu và in ra log để debug
-        viewModel.getLineups().observe(getViewLifecycleOwner(), lineups -> {
-            if (lineups != null && !lineups.isEmpty()) {
-                Log.d(TAG, "SUCCESS: Dữ liệu Đội hình (Lineups) đã về. Số lượng: " + lineups.size());
-            } else {
-                Log.e(TAG, "ERROR or EMPTY: Dữ liệu Đội hình (Lineups) bị rỗng hoặc lỗi.");
+        // Chỉ cần lắng nghe LiveData duy nhất này
+        viewModel.getEnrichedLineupData().observe(getViewLifecycleOwner(), pair -> {
+            if (pair != null) {
+                // `pair.first` là đội nhà, `pair.second` là đội khách
+                updateUi(pair.first, pair.second);
             }
-            updateUi();
-        });
-
-        viewModel.getHomeTeamPlayers().observe(getViewLifecycleOwner(), players -> {
-            if (players != null && !players.isEmpty()) {
-                Log.d(TAG, "SUCCESS: Dữ liệu Cầu thủ đội nhà đã về. Số lượng: " + players.size());
-            } else {
-                Log.e(TAG, "ERROR or EMPTY: Dữ liệu Cầu thủ đội nhà bị rỗng hoặc lỗi.");
-            }
-            updateUi();
-        });
-
-        viewModel.getAwayTeamPlayers().observe(getViewLifecycleOwner(), players -> {
-            if (players != null && !players.isEmpty()) {
-                Log.d(TAG, "SUCCESS: Dữ liệu Cầu thủ đội khách đã về. Số lượng: " + players.size());
-            } else {
-                Log.e(TAG, "ERROR or EMPTY: Dữ liệu Cầu thủ đội khách bị rỗng hoặc lỗi.");
-            }
-            updateUi();
         });
     }
 
-    private void setupRecyclerViews(View view) {
-        homeStartersRecycler = view.findViewById(R.id.recycler_home_starters);
-        homeSubsRecycler = view.findViewById(R.id.recycler_home_subs);
-        awayStartersRecycler = view.findViewById(R.id.recycler_away_starters);
-        awaySubsRecycler = view.findViewById(R.id.recycler_away_subs);
-
-        homeStartersAdapter = new LineupPlayerAdapter();
+    private void setupRecyclerViews() {
         homeSubsAdapter = new LineupPlayerAdapter();
-        awayStartersAdapter = new LineupPlayerAdapter();
         awaySubsAdapter = new LineupPlayerAdapter();
-
-        homeStartersRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-        homeStartersRecycler.setAdapter(homeStartersAdapter);
         homeSubsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         homeSubsRecycler.setAdapter(homeSubsAdapter);
-        awayStartersRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
-        awayStartersRecycler.setAdapter(awayStartersAdapter);
         awaySubsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         awaySubsRecycler.setAdapter(awaySubsAdapter);
     }
 
-    private void updateUi() {
-        List<ApiLineup> lineups = viewModel.getLineups().getValue();
-        List<ApiPlayerResponse> homePlayers = viewModel.getHomeTeamPlayers().getValue();
-        List<ApiPlayerResponse> awayPlayers = viewModel.getAwayTeamPlayers().getValue();
+    private void updateUi(LineupDisplayData homeData, LineupDisplayData awayData) {
+        // Cập nhật đội nhà
+        if (homeData != null) {
+            homeTeamName.setText(homeData.getTeamName());
+            homeFormation.setText("Chiến thuật: " + homeData.getFormation());
+            drawPlayersOnPitch(pitchLayoutHome, homeData.getStarters(), homeData.getFormation(), true);
+            homeSubsAdapter.setPlayers(homeData.getSubstitutes());
+        }
 
-        // Kiểm tra xem nguồn dữ liệu nào chưa sẵn sàng
-        if (lineups == null || lineups.isEmpty()) {
-            Log.d(TAG, "Bỏ qua updateUI: Dữ liệu đội hình chưa sẵn sàng.");
+        // Cập nhật đội khách
+        if (awayData != null) {
+            awayTeamName.setText(awayData.getTeamName());
+            awayFormation.setText("Chiến thuật: " + awayData.getFormation());
+            drawPlayersOnPitch(pitchLayoutAway, awayData.getStarters(), awayData.getFormation(), false);
+            awaySubsAdapter.setPlayers(awayData.getSubstitutes());
+        }
+    }
+
+    private void drawPlayersOnPitch(ConstraintLayout pitchLayout, List<PlayerDisplay> starters, String formation, boolean isHomeTeam) {
+        if (pitchLayout == null || starters == null || formation == null || starters.isEmpty() || getContext() == null) {
             return;
         }
-        if (homePlayers == null) {
-            Log.d(TAG, "Bỏ qua updateUI: Dữ liệu cầu thủ đội nhà chưa sẵn sàng.");
-            return;
-        }
-        if (awayPlayers == null) {
-            Log.d(TAG, "Bỏ qua updateUI: Dữ liệu cầu thủ đội khách chưa sẵn sàng.");
-            return;
-        }
 
-        Log.d(TAG, "TẤT CẢ DỮ LIỆU ĐÃ SẴN SÀNG. Bắt đầu cập nhật giao diện.");
+        pitchLayout.removeAllViews();
+        ConstraintSet constraintSet = new ConstraintSet();
 
-        Map<Integer, String> homeNationalityMap = homePlayers.stream()
-                .map(ApiPlayerResponse::getPlayer)
-                .collect(Collectors.toMap(ApiDetailedPlayerInfo::getId, ApiDetailedPlayerInfo::getNationality, (a, b) -> a));
+        PlayerDisplay goalkeeper = starters.get(0);
+        List<PlayerDisplay> fieldPlayers = new ArrayList<>(starters.subList(1, starters.size()));
 
-        Map<Integer, String> awayNationalityMap = awayPlayers.stream()
-                .map(ApiPlayerResponse::getPlayer)
-                .collect(Collectors.toMap(ApiDetailedPlayerInfo::getId, ApiDetailedPlayerInfo::getNationality, (a, b) -> a));
-
-        if (lineups.size() > 0) {
-            ApiLineup homeLineup = lineups.get(0);
-            homeTeamName.setText(homeLineup.getTeam().getName());
-            homeStartersAdapter.setNationalityMap(homeNationalityMap);
-            homeStartersAdapter.setPlayers(homeLineup.getStartXI());
-            homeSubsAdapter.setNationalityMap(homeNationalityMap);
-            homeSubsAdapter.setPlayers(homeLineup.getSubstitutes());
+        List<Integer> formationLines = new ArrayList<>();
+        try {
+            for (String part : formation.split("-")) {
+                formationLines.add(Integer.parseInt(part));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Formation không hợp lệ: " + formation);
+            return; // Không vẽ nếu formation sai
         }
 
-        if (lineups.size() > 1) {
-            ApiLineup awayLineup = lineups.get(1);
-            awayTeamName.setText(awayLineup.getTeam().getName());
-            awayStartersAdapter.setNationalityMap(awayNationalityMap);
-            awayStartersAdapter.setPlayers(awayLineup.getStartXI());
-            awaySubsAdapter.setNationalityMap(awayNationalityMap);
-            awaySubsAdapter.setPlayers(awayLineup.getSubstitutes());
+        // Nếu là đội nhà, các hàng được vẽ từ dưới lên (hậu vệ -> tiền đạo)
+        // Nếu là đội khách, ta đảo ngược lại để vẽ từ trên xuống
+        if (!isHomeTeam) {
+            Collections.reverse(fieldPlayers);
+            Collections.reverse(formationLines);
         }
+
+        // --- Vẽ Thủ Môn ---
+        View gkView = createPlayerView(goalkeeper);
+        int gkId = View.generateViewId();
+        gkView.setId(gkId);
+        pitchLayout.addView(gkView);
+
+        // --- Vẽ Các Cầu Thủ Khác ---
+        List<List<Integer>> allLineIds = new ArrayList<>();
+        int playerIndex = 0;
+        for (Integer playersInLine : formationLines) {
+            List<Integer> currentLineIds = new ArrayList<>();
+            for (int i = 0; i < playersInLine; i++) {
+                if (playerIndex >= fieldPlayers.size()) break;
+                View playerView = createPlayerView(fieldPlayers.get(playerIndex));
+                int viewId = View.generateViewId();
+                playerView.setId(viewId);
+                pitchLayout.addView(playerView);
+                currentLineIds.add(viewId);
+                playerIndex++;
+            }
+            allLineIds.add(currentLineIds);
+        }
+
+        // --- Áp Dụng Constraints ---
+        constraintSet.clone(pitchLayout);
+
+        // Ràng buộc cho thủ môn
+        constraintSet.constrainWidth(gkId, ConstraintSet.WRAP_CONTENT);
+        constraintSet.constrainHeight(gkId, ConstraintSet.WRAP_CONTENT);
+        constraintSet.connect(gkId, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START);
+        constraintSet.connect(gkId, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END);
+        if (isHomeTeam) {
+            constraintSet.connect(gkId, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM, 16);
+        } else {
+            constraintSet.connect(gkId, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP, 16);
+        }
+
+        // Ràng buộc cho các hàng cầu thủ
+        float verticalBiasStep = 0.8f / (allLineIds.size() + 1);
+        for (int i = 0; i < allLineIds.size(); i++) {
+            List<Integer> lineIds = allLineIds.get(i);
+            if (lineIds.isEmpty()) continue;
+
+            int[] idsArray = lineIds.stream().mapToInt(id -> id).toArray();
+
+            constraintSet.createHorizontalChain(ConstraintSet.PARENT_ID, ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT, idsArray, null, ConstraintSet.CHAIN_SPREAD);
+
+            float verticalBias = isHomeTeam ? (0.95f - (i + 1) * verticalBiasStep) : (0.05f + (i + 1) * verticalBiasStep);
+
+            for (int viewId : idsArray) {
+                constraintSet.constrainWidth(viewId, ConstraintSet.WRAP_CONTENT);
+                constraintSet.constrainHeight(viewId, ConstraintSet.WRAP_CONTENT);
+                constraintSet.connect(viewId, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+                constraintSet.connect(viewId, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+                constraintSet.setVerticalBias(viewId, verticalBias);
+            }
+        }
+
+        constraintSet.applyTo(pitchLayout);
+    }
+
+    private View createPlayerView(PlayerDisplay player) {
+        View playerView = LayoutInflater.from(getContext()).inflate(R.layout.item_player_on_pitch, (ViewGroup) getView(), false);
+
+        TextView number = playerView.findViewById(R.id.text_player_number);
+        TextView name = playerView.findViewById(R.id.text_player_name);
+
+        // Không cần tìm ImageView cho ảnh thật và rating nữa
+
+        // Gán dữ liệu
+        number.setText(String.valueOf(player.getNumber()));
+
+        // Lấy họ của cầu thủ cho ngắn gọn
+        String fullName = player.getName();
+        String[] nameParts = fullName.split(" ");
+        String lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : fullName;
+        name.setText(lastName);
+
+        // Không cần gọi Glide nữa
+
+        return playerView;
     }
 }
