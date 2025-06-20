@@ -2,12 +2,13 @@ package com.example.flashscoreapp.data.api;
 
 import com.example.flashscoreapp.data.model.remote.ApiLeaguesResponse;
 import com.example.flashscoreapp.data.model.remote.ApiMatch;
+import com.example.flashscoreapp.data.model.remote.ApiPlayerResponse;
 import com.example.flashscoreapp.data.model.remote.ApiResponse;
 import com.example.flashscoreapp.data.model.remote.ApiStandingsResponse;
 import com.example.flashscoreapp.data.model.remote.ApiStatisticsResponse;
 import com.example.flashscoreapp.data.model.remote.ApiTopScorerData;
 import com.example.flashscoreapp.data.model.remote.ApiTeamResponse;
-
+import com.example.flashscoreapp.data.model.remote.ApiLineup;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
@@ -92,5 +93,25 @@ public interface ApiService {
             @Header("x-rapidapi-host") String apiHost
     );
 
+    @GET("fixtures/lineups")
+    Call<ApiResponse<ApiLineup>> getLineups(
+            @Query("fixture") int fixtureId,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+    @GET("fixtures")
+    Call<ApiResponse<ApiMatch>> getLastFixturesForTeam(
+            @Query("team") int teamId,
+            @Query("last") int count,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
 
+    @GET("players")
+    Call<ApiResponse<ApiPlayerResponse>> getPlayersForTeam(
+            @Query("team") int teamId,
+            @Query("season") int season,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
 }

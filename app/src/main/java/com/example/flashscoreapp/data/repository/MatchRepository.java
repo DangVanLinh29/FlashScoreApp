@@ -1,6 +1,8 @@
 package com.example.flashscoreapp.data.repository;
 
 import android.app.Application;
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -19,22 +21,11 @@ import com.example.flashscoreapp.data.model.domain.StandingItem;
 import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.data.model.local.FavoriteMatch;
 import com.example.flashscoreapp.data.model.local.FavoriteTeam;
-import com.example.flashscoreapp.data.model.remote.ApiEvent;
-import com.example.flashscoreapp.data.model.remote.ApiLeagueData;
-import com.example.flashscoreapp.data.model.remote.ApiLeaguesResponse;
-import com.example.flashscoreapp.data.model.remote.ApiMatch;
-import com.example.flashscoreapp.data.model.remote.ApiResponse;
-import com.example.flashscoreapp.data.model.remote.ApiStandingsResponse;
-import com.example.flashscoreapp.data.model.remote.ApiStatisticItem;
-import com.example.flashscoreapp.data.model.remote.ApiStatisticsResponse;
-import com.example.flashscoreapp.data.model.remote.ApiTeamStatistics;
-import com.example.flashscoreapp.data.model.remote.ApiTopScorerData;
-import com.example.flashscoreapp.data.model.remote.ApiTeamResponse;
-import com.example.flashscoreapp.data.model.remote.ApiTeamInfo;
-
+import com.example.flashscoreapp.data.model.remote.*; // Import gọn hơn
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +44,7 @@ public class MatchRepository {
     private final MatchDao matchDao;
     private final TeamDao teamDao;
     private final ExecutorService executorService;
-    private final String API_KEY = "5acb3c9129msh55387e600567f2fp11700djsnc70a2511d9c5";
+    private final String API_KEY = "9603cad7a8mshaf2d58ef107a002p1f7706jsn62cf5be4f1d5";
     private final String API_HOST = "api-football-v1.p.rapidapi.com";
 
     public MatchRepository(Application application) {
@@ -192,7 +183,10 @@ public class MatchRepository {
 
         for (ApiMatch apiMatch : apiMatches) {
             try {
-                // Tạo đối tượng League với đầy đủ thông tin
+                if (apiMatch.getLeague() == null || apiMatch.getTeams() == null || apiMatch.getFixture() == null || apiMatch.getGoals() == null) {
+                    continue; // Bỏ qua nếu dữ liệu cơ bản không đầy đủ
+                }
+
                 League league = new League(
                         apiMatch.getLeague().getId(),
                         apiMatch.getLeague().getName(),
@@ -200,7 +194,6 @@ public class MatchRepository {
                         apiMatch.getLeague().getCountry()
                 );
 
-                // Tạo đối tượng Team với đầy đủ thông tin
                 Team homeTeam = new Team(
                         apiMatch.getTeams().getHome().getId(),
                         apiMatch.getTeams().getHome().getName(),
@@ -212,11 +205,18 @@ public class MatchRepository {
                         apiMatch.getTeams().getAway().getLogo()
                 );
 
-                Score score = new Score(apiMatch.getGoals().getHome(), apiMatch.getGoals().getAway());
+                // ======================= SỬA LỖI NULLPOINTEREXCEPTION TẠI ĐÂY =======================
+                // Kiểm tra xem giá trị tỷ số có phải là null không, nếu có thì mặc định là 0
+                Integer homeScore = apiMatch.getGoals().getHome();
+                Integer awayScore = apiMatch.getGoals().getAway();
+                Score score = new Score(
+                        homeScore != null ? homeScore : 0,
+                        awayScore != null ? awayScore : 0
+                );
+                // =================================================================================
 
                 long matchTime = sdf.parse(apiMatch.getFixture().getDate()).getTime();
 
-                // SỬA LẠI LỜI GỌI CONSTRUCTOR ĐỂ TRUYỀN ĐỦ 8 THAM SỐ
                 Match match = new Match(
                         apiMatch.getFixture().getId(),
                         league,
@@ -229,6 +229,7 @@ public class MatchRepository {
                 );
                 domainMatches.add(match);
             } catch (Exception e) {
+                Log.e("MatchRepository", "Error converting ApiMatch to Domain Match", e);
                 e.printStackTrace();
             }
         }
@@ -412,6 +413,83 @@ public class MatchRepository {
             @Override
             public void onFailure(Call<ApiLeaguesResponse> call, Throwable t) {
                 data.postValue(null);
+            }
+        });
+        return data;
+    }
+    // ... trong class MatchRepository
+    public LiveData<List<ApiLineup>> getLineups(int fixtureId) {
+        final MutableLiveData<List<ApiLineup>> data = new MutableLiveData<>();
+        apiService.getLineups(fixtureId, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiLineup>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ApiLineup>> call, Response<ApiResponse<ApiLineup>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    data.postValue(response.body().getResponse());
+                } else {
+                    data.postValue(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<ApiResponse<ApiLineup>> call, Throwable t) {
+                data.postValue(null);
+            }
+        });
+        return data;
+    }
+    public LiveData<List<Match>> getLastMatchesForTeam(int teamId, int count) {
+        final MutableLiveData<List<Match>> data = new MutableLiveData<>();
+        apiService.getLastFixturesForTeam(teamId, count, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiMatch>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ApiMatch>> call, Response<ApiResponse<ApiMatch>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    data.postValue(convertApiMatchesToDomain(response.body().getResponse()));
+                } else {
+                    data.postValue(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<ApiResponse<ApiMatch>> call, Throwable t) {
+                data.postValue(null);
+            }
+        });
+        return data;
+    }
+
+    public LiveData<List<ApiPlayerResponse>> getPlayersForTeam(int teamId) {
+        final MutableLiveData<List<ApiPlayerResponse>> data = new MutableLiveData<>();
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+
+        // Thử với năm hiện tại trước
+        apiService.getPlayersForTeam(teamId, currentYear, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiPlayerResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ApiPlayerResponse>> call, Response<ApiResponse<ApiPlayerResponse>> response) {
+                // Nếu thành công và có dữ liệu
+                if (response.isSuccessful() && response.body() != null && !response.body().getResponse().isEmpty()) {
+                    data.postValue(response.body().getResponse());
+                } else {
+                    // Nếu không có dữ liệu, thử lại với năm trước đó
+                    Log.d("MatchRepository", "Không tìm thấy cầu thủ cho đội " + teamId + " mùa " + currentYear + ". Thử lại với mùa trước.");
+                    apiService.getPlayersForTeam(teamId, currentYear - 1, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiPlayerResponse>>() {
+                        @Override
+                        public void onResponse(Call<ApiResponse<ApiPlayerResponse>> call2, Response<ApiResponse<ApiPlayerResponse>> response2) {
+                            if (response2.isSuccessful() && response2.body() != null) {
+                                data.postValue(response2.body().getResponse());
+                            } else {
+                                data.postValue(null); // Cả 2 lần đều thất bại
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ApiResponse<ApiPlayerResponse>> call2, Throwable t2) {
+                            data.postValue(null); // Lỗi mạng ở lần 2
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<ApiPlayerResponse>> call, Throwable t) {
+                data.postValue(null); // Lỗi mạng ở lần 1
             }
         });
         return data;

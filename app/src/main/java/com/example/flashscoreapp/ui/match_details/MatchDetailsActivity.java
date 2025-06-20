@@ -1,7 +1,6 @@
 package com.example.flashscoreapp.ui.match_details;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,6 +13,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.bumptech.glide.Glide;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.Match;
+import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.ui.home.HomeViewModel;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -48,8 +48,17 @@ public class MatchDetailsActivity extends AppCompatActivity {
             return;
         }
 
-        MatchDetailsViewModelFactory factory = new MatchDetailsViewModelFactory(getApplication(), match.getMatchId());
+        // ======================= SỬA LỖI TẠI ĐÂY =======================
+        // Khởi tạo Factory với đủ 4 tham số: application, matchId, homeId, awayId
+        MatchDetailsViewModelFactory factory = new MatchDetailsViewModelFactory(
+                getApplication(),
+                match.getMatchId(),
+                match.getHomeTeam().getId(),
+                match.getAwayTeam().getId()
+        );
         viewModel = new ViewModelProvider(this, factory).get(MatchDetailsViewModel.class);
+        // ===============================================================
+
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         // Ánh xạ các biểu tượng yêu thích
@@ -73,43 +82,43 @@ public class MatchDetailsActivity extends AppCompatActivity {
         observeFavoriteStatus();
 
         favoriteIconHome.setOnClickListener(v -> {
+            Team homeTeam = match.getHomeTeam();
             if (isHomeFavorite) {
-                homeViewModel.removeFavoriteTeam(match.getHomeTeam());
+                homeViewModel.removeFavoriteTeam(homeTeam);
             } else {
-                homeViewModel.addFavoriteTeam(match.getHomeTeam());
+                homeViewModel.addFavoriteTeam(homeTeam);
             }
         });
 
         favoriteIconAway.setOnClickListener(v -> {
+            Team awayTeam = match.getAwayTeam();
             if (isAwayFavorite) {
-                homeViewModel.removeFavoriteTeam(match.getAwayTeam());
+                homeViewModel.removeFavoriteTeam(awayTeam);
             } else {
-                homeViewModel.addFavoriteTeam(match.getAwayTeam());
+                homeViewModel.addFavoriteTeam(awayTeam);
             }
         });
 
     }
 
-
-
     private void updateScoreboard() {
         TextView homeName = findViewById(R.id.text_home_name_details);
         TextView awayName = findViewById(R.id.text_away_name_details);
         TextView score = findViewById(R.id.text_score_details);
+        TextView status = findViewById(R.id.text_status_details);
         ImageView homeLogo = findViewById(R.id.image_home_logo_details);
         ImageView awayLogo = findViewById(R.id.image_away_logo_details);
 
-        // Định dạng lại tên đội nhà để xuống dòng
         String originalHomeName = match.getHomeTeam().getName();
         String formattedHomeName = originalHomeName.replaceFirst(" ", "\n");
         homeName.setText(formattedHomeName);
 
-        // Định dạng lại tên đội khách để xuống dòng
         String originalAwayName = match.getAwayTeam().getName();
         String formattedAwayName = originalAwayName.replaceFirst(" ", "\n");
         awayName.setText(formattedAwayName);
 
         score.setText(match.getScore().getHome() + " - " + match.getScore().getAway());
+        status.setText(match.getStatus());
 
         Glide.with(this).load(match.getHomeTeam().getLogoUrl()).into(homeLogo);
         Glide.with(this).load(match.getAwayTeam().getLogoUrl()).into(awayLogo);
@@ -134,12 +143,12 @@ public class MatchDetailsActivity extends AppCompatActivity {
             }
         });
     }
+
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
     }
-
 
     public Match getMatch() { return this.match; }
 }

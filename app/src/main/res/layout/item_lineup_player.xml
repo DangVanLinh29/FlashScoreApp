@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="10dp"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="8dp">
+
+    <TextView
+        android:id="@+id/text_player_number"
+        android:layout_width="25dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="?android:attr/textColorSecondary"
+        tools:text="13"/>
+
+    <ImageView
+        android:id="@+id/image_player_flag"
+        android:layout_width="20dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="fitXY"
+        tools:src="@tools:sample/backgrounds/scenic"/>
+
+    <TextView
+        android:id="@+id/text_player_name"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textStyle="bold"
+        tools:text="Arrizabalaga K. (G)"/>
+
+</LinearLayout>
