@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -13,24 +14,24 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.Match;
-import com.example.flashscoreapp.data.model.domain.RoundHeader;
+import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.ui.home.HomeViewModel;
 import com.example.flashscoreapp.ui.home.MatchAdapter;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
+import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Calendar;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ResultsTabFragment extends Fragment {
+public class ResultsTabFragment extends Fragment implements MatchAdapter.OnItemClickListener {
 
     private ResultsViewModel resultsViewModel;
     private HomeViewModel homeViewModel;
     private ResultsAdapter adapter;
+    private int leagueId = 0;
+    private int seasonYear = 0;
 
     public static ResultsTabFragment newInstance(int leagueId, int seasonYear) {
         ResultsTabFragment fragment = new ResultsTabFragment();
@@ -51,45 +52,33 @@ public class ResultsTabFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        int leagueId = getArguments() != null ? getArguments().getInt("LEAGUE_ID") : 0;
-        int seasonYear = getArguments() != null ? getArguments().getInt("SEASON_YEAR") : 0;
+        leagueId = getArguments() != null ? getArguments().getInt("LEAGUE_ID") : 0;
+        seasonYear = getArguments() != null ? getArguments().getInt("SEASON_YEAR") : 0;
 
         RecyclerView recyclerView = view.findViewById(R.id.main_recycler_view);
+        TextView emptyText = view.findViewById(R.id.text_empty_message);
         adapter = new ResultsAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
-        adapter.setOnItemClickListener(new MatchAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Match match) {
-                Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
-                intent.putExtra("EXTRA_MATCH", match);
-                startActivity(intent);
-            }
-            @Override
-            public void onFavoriteClick(Match match, boolean isFavorite) {
-                if (isFavorite) {
-                    homeViewModel.removeFavorite(match);
-                } else {
-                    homeViewModel.addFavorite(match);
-                }
-            }
-        });
+        // Gán listener là chính Fragment này
+        adapter.setOnItemClickListener(this);
 
         if (leagueId != 0 && seasonYear != 0) {
             homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
             ResultsViewModelFactory factory = new ResultsViewModelFactory(requireActivity().getApplication(), leagueId, seasonYear);
             resultsViewModel = new ViewModelProvider(this, factory).get(ResultsViewModel.class);
 
-            // Giả sử ViewModel trả về List<Match>
-            resultsViewModel.getGroupedResults().observe(getViewLifecycleOwner(), matches -> {
-                if (matches != null) {
-                    // --- BẮT ĐẦU SỬA LỖI ---
-                    // 1. Chuyển đổi List<Match> thành List<Object> bằng cách nhóm theo vòng
-                    List<Object> displayList = groupResultsByRound(matches);
-                    // 2. Truyền danh sách đã xử lý vào adapter
-                    adapter.setItems(displayList);
-                    // --- KẾT THÚC SỬA LỖI ---
+            resultsViewModel.getGroupedResults().observe(getViewLifecycleOwner(), items -> {
+                if (items != null && !items.isEmpty()) {
+                    recyclerView.setVisibility(View.VISIBLE);
+                    emptyText.setVisibility(View.GONE);
+                    adapter.setItems(items);
+                } else {
+                    recyclerView.setVisibility(View.GONE);
+                    emptyText.setVisibility(View.VISIBLE);
+                    emptyText.setText("Không có kết quả nào cho mùa giải này.");
+                    adapter.setItems(new ArrayList<>());
                 }
             });
 
@@ -104,50 +93,22 @@ public class ResultsTabFragment extends Fragment {
         }
     }
 
-    // Hàm để nhóm các trận đã kết thúc theo vòng đấu
-    private List<Object> groupResultsByRound(List<Object> rawItems) {
-        // Chuyển đổi List<Object> từ ViewModel về List<Match> để xử lý
-        List<Match> matches = new ArrayList<>();
-        for (Object item : rawItems) {
-            if (item instanceof Match) {
-                matches.add((Match) item);
-            }
-        }
-
-        if (matches.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        Map<String, List<Match>> groupedByRound = matches.stream()
-                .collect(Collectors.groupingBy(
-                        Match::getRound,
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        // Sắp xếp các vòng đấu theo thứ tự giảm dần (Vòng 38, Vòng 37...)
-        List<String> sortedRounds = new ArrayList<>(groupedByRound.keySet());
-        Collections.sort(sortedRounds, (round1, round2) -> {
-            try {
-                int r1 = Integer.parseInt(round1.replaceAll("\\D+", ""));
-                int r2 = Integer.parseInt(round2.replaceAll("\\D+", ""));
-                return Integer.compare(r2, r1);
-            } catch (NumberFormatException e) {
-                return round2.compareTo(round1);
-            }
-        });
-
-        List<Object> flattenedList = new ArrayList<>();
-        for (String round : sortedRounds) {
-            String translatedRound = round.replace("Regular Season -", "Vòng");
-            flattenedList.add(new RoundHeader(translatedRound.trim()));
-            List<Match> matchesInRound = groupedByRound.get(round);
-            if(matchesInRound != null) {
-                // Sắp xếp các trận trong cùng một vòng theo thời gian
-                matchesInRound.sort(Comparator.comparingLong(Match::getMatchTime).reversed());
-                flattenedList.addAll(matchesInRound);
-            }
-        }
-        return flattenedList;
+    @Override
+    public void onItemClick(Match match) {
+        Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
+        intent.putExtra("EXTRA_MATCH", match);
+        startActivity(intent);
     }
+
+    @Override
+    public void onFavoriteClick(Match match, boolean isFavorite) {
+        if (isFavorite) {
+            homeViewModel.removeFavorite(match);
+        } else {
+            homeViewModel.addFavorite(match);
+        }
+    }
+
+
+
 }

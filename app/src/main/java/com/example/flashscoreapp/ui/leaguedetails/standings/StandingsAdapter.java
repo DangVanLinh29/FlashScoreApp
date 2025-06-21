@@ -11,16 +11,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.StandingItem;
+import com.example.flashscoreapp.data.model.domain.Team;
+import com.example.flashscoreapp.data.model.remote.ApiTeamInfo; // Import ApiTeamInfo
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StandingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
     private List<Object> displayList = new ArrayList<>();
+    private OnTeamClickListener teamClickListener;
+
+    public interface OnTeamClickListener {
+        void onTeamClicked(Team team);
+    }
+
+    public void setOnTeamClickListener(OnTeamClickListener listener) {
+        this.teamClickListener = listener;
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     public void setDisplayList(List<Object> list) {
@@ -54,7 +64,18 @@ public class StandingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (holder.getItemViewType() == TYPE_HEADER) {
             ((HeaderViewHolder) holder).bind((String) displayList.get(position));
         } else {
-            ((StandingViewHolder) holder).bind((StandingItem) displayList.get(position));
+            StandingItem item = (StandingItem) displayList.get(position);
+            ((StandingViewHolder) holder).bind(item);
+
+            // Gán sự kiện click cho cả hàng ở đây
+            holder.itemView.setOnClickListener(v -> {
+                if (teamClickListener != null) {
+                    ApiTeamInfo apiTeam = item.getTeam();
+                    // Chuyển đổi từ ApiTeamInfo sang Team domain model
+                    Team team = new Team(apiTeam.getId(), apiTeam.getName(), apiTeam.getLogo());
+                    teamClickListener.onTeamClicked(team);
+                }
+            });
         }
     }
 
@@ -63,7 +84,6 @@ public class StandingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         return displayList.size();
     }
 
-    // ViewHolder cho tiêu đề bảng
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView textHeader;
         public HeaderViewHolder(@NonNull View itemView) {
@@ -75,7 +95,6 @@ public class StandingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
     }
 
-    // ViewHolder cho từng đội
     static class StandingViewHolder extends RecyclerView.ViewHolder {
         TextView textRank, textTeamName, textPlayed, text_goals_for_against, textPoints;
         ImageView imageTeamLogo;
@@ -90,7 +109,7 @@ public class StandingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             imageTeamLogo = itemView.findViewById(R.id.image_team_logo);
         }
 
-        void bind(StandingItem item) {
+        void bind(final StandingItem item) {
             textRank.setText(String.valueOf(item.getRank()));
             textTeamName.setText(item.getTeam().getName());
             textPlayed.setText(String.valueOf(item.getAll().getPlayed()));

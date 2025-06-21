@@ -1,5 +1,6 @@
 package com.example.flashscoreapp.ui.leaguedetails.standings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +13,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.StandingItem;
-
+import com.example.flashscoreapp.data.model.domain.Team;
+import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OverallStandingsFragment extends Fragment {
+public class OverallStandingsFragment extends Fragment implements StandingsAdapter.OnTeamClickListener {
 
     private StandingsViewModel standingsViewModel;
     private StandingsAdapter adapter;
@@ -33,7 +35,6 @@ public class OverallStandingsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Đảm bảo bạn đã đổi tên layout này
         return inflater.inflate(R.layout.fragment_overall_standings, container, false);
     }
 
@@ -50,6 +51,7 @@ public class OverallStandingsFragment extends Fragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view_standings);
         adapter = new StandingsAdapter();
+        adapter.setOnTeamClickListener(this); // Dòng này giờ sẽ hết báo lỗi
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
 
@@ -60,16 +62,25 @@ public class OverallStandingsFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onTeamClicked(Team team) {
+        Intent intent = new Intent(getActivity(), TeamDetailsActivity.class);
+        intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
+        // Lấy leagueId và seasonYear của chính Fragment này để truyền đi
+        int leagueId = getArguments() != null ? getArguments().getInt("LEAGUE_ID") : 0;
+        int seasonYear = getArguments() != null ? getArguments().getInt("SEASON_YEAR") : 0;
+        intent.putExtra(TeamDetailsActivity.EXTRA_LEAGUE_ID, leagueId);
+        intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, seasonYear);
+        startActivity(intent);
+    }
+
     private void observeViewModel() {
         standingsViewModel.getStandings().observe(getViewLifecycleOwner(), allGroups -> {
             if (allGroups != null && !allGroups.isEmpty()) {
-                // Tạo một danh sách phẳng từ danh sách các bảng đấu
                 List<Object> displayList = new ArrayList<>();
                 for (List<StandingItem> group : allGroups) {
                     if (group != null && !group.isEmpty()) {
-                        // Lấy tên bảng từ item đầu tiên
                         displayList.add(group.get(0).getGroup());
-                        // Thêm tất cả các đội trong bảng đó
                         displayList.addAll(group);
                     }
                 }

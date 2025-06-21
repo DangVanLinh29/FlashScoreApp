@@ -53,12 +53,11 @@ public class MatchStatisticsFragment extends Fragment {
     private List<Object> groupStatistics(List<MatchStatistic> stats) {
         // Định nghĩa các nhóm và thứ tự xuất hiện
         Map<String, List<MatchStatistic>> groupedData = new LinkedHashMap<>();
-        String[] categories = {"Cú sút", "Tấn công", "Chuyền bóng", "Phòng ngự", "Bảo vệ khung thành", "Khác"};
+        String[] categories = {"Cú sút", "Tấn công", "Chuyền bóng", "Phòng ngự", "Bảo vệ khung thành"};
         for (String category : categories) {
             groupedData.put(category, new ArrayList<>());
         }
 
-        // Ánh xạ loại thống kê từ API vào các nhóm đã định nghĩa
         Map<String, String> typeToCategoryMap = new HashMap<>();
         typeToCategoryMap.put("Shots on Goal", "Cú sút");
         typeToCategoryMap.put("Shots off Goal", "Cú sút");
@@ -66,31 +65,33 @@ public class MatchStatisticsFragment extends Fragment {
         typeToCategoryMap.put("Blocked Shots", "Cú sút");
         typeToCategoryMap.put("Shots insidebox", "Cú sút");
         typeToCategoryMap.put("Shots outsidebox", "Cú sút");
-        typeToCategoryMap.put("Expected Goals (xG)", "Cú sút");
-
         typeToCategoryMap.put("Corner Kicks", "Tấn công");
         typeToCategoryMap.put("Offsides", "Tấn công");
-
         typeToCategoryMap.put("Ball Possession", "Chuyền bóng");
         typeToCategoryMap.put("Passes %", "Chuyền bóng");
         typeToCategoryMap.put("Total passes", "Chuyền bóng");
         typeToCategoryMap.put("Passes accurate", "Chuyền bóng");
-
         typeToCategoryMap.put("Fouls", "Phòng ngự");
         typeToCategoryMap.put("Yellow Cards", "Phòng ngự");
         typeToCategoryMap.put("Red Cards", "Phòng ngự");
-        typeToCategoryMap.put("Tackles", "Phòng ngự");
-        typeToCategoryMap.put("Interceptions", "Phòng ngự");
-        typeToCategoryMap.put("Clearances", "Phòng ngự");
-
         typeToCategoryMap.put("Goalkeeper Saves", "Bảo vệ khung thành");
 
+
         for (MatchStatistic stat : stats) {
-            String category = typeToCategoryMap.getOrDefault(stat.getType(), "Khác");
-            groupedData.get(category).add(stat);
+            if (stat.getHomeValue() == null || stat.getAwayValue() == null ||
+                    stat.getHomeValue().equalsIgnoreCase("null") ||
+                    stat.getAwayValue().equalsIgnoreCase("null")) {
+                continue;
+            }
+
+            String category = typeToCategoryMap.get(stat.getType());
+
+            if (category != null) {
+                groupedData.get(category).add(stat);
+            }
         }
 
-        // Tạo danh sách cuối cùng để hiển thị
+
         List<Object> finalList = new ArrayList<>();
         for (String category : categories) {
             List<MatchStatistic> statsForCategory = groupedData.get(category);

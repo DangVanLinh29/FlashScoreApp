@@ -11,13 +11,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.Match;
 import com.example.flashscoreapp.ui.home.MatchAdapter;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
-
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FavoriteMatchesFragment extends Fragment {
@@ -54,7 +54,7 @@ public class FavoriteMatchesFragment extends Fragment {
             @Override
             public void onFavoriteClick(Match match, boolean isFavorite) {
                 if(isFavorite) {
-                    viewModel.removeFavorite(match); // Thêm hàm này vào ViewModel
+                    viewModel.removeFavorite(match);
                 }
             }
         });
@@ -65,14 +65,14 @@ public class FavoriteMatchesFragment extends Fragment {
                 recyclerView.setVisibility(View.VISIBLE);
                 textNoItems.setVisibility(View.GONE);
                 matchAdapter.setMatches(favoriteMatches);
-                HashSet<Integer> favoriteIds = favoriteMatches.stream()
+                Set<Integer> favoriteIds = favoriteMatches.stream()
                         .map(Match::getMatchId)
-                        .collect(Collectors.toCollection(HashSet::new));
+                        .collect(Collectors.toSet());
                 matchAdapter.setFavoriteMatchIds(favoriteIds);
             } else {
                 recyclerView.setVisibility(View.GONE);
                 textNoItems.setVisibility(View.VISIBLE);
-                matchAdapter.setMatches(new java.util.ArrayList<>());
+                matchAdapter.setMatches(new ArrayList<>());
             }
         });
     }

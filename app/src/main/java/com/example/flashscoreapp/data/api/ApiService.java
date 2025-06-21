@@ -119,7 +119,39 @@ public interface ApiService {
     Call<ApiResponse<ApiMatch>> getFixturesByLeagueAndSeason(
             @Query("league") int leagueId,
             @Query("season") int season,
-            @Query("status") String status, // Thêm tham số status
+            @Query("status") String status,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+
+    @GET("fixtures")
+    Call<ApiResponse<ApiMatch>> getFixturesForTeam(
+            @Query("team") int teamId,
+            @Query("season") int season,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+
+    @GET("teams")
+    Call<ApiResponse<ApiTeamResponse>> getTeamDetails(
+            @Query("id") int teamId,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+
+    @GET("fixtures")
+    Call<ApiResponse<ApiMatch>> getFixturesForTeamByStatus(
+            @Query("team") int teamId,
+            @Query("season") int season,
+            @Query("status") String status,
+            @Header("x-rapidapi-key") String apiKey,
+            @Header("x-rapidapi-host") String apiHost
+    );
+
+    @GET("fixtures")
+    Call<ApiResponse<ApiMatch>> getNextFixturesForTeam(
+            @Query("team") int teamId,
+            @Query("next") int count,
             @Header("x-rapidapi-key") String apiKey,
             @Header("x-rapidapi-host") String apiHost
     );

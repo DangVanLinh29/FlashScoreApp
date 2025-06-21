@@ -1,5 +1,6 @@
 package com.example.flashscoreapp.ui.search;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -15,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.data.model.remote.ApiLeagueData;
+import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
+
 import java.util.ArrayList;
 
 public class SearchActivity extends AppCompatActivity {
@@ -55,15 +58,14 @@ public class SearchActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new SearchAdapter.OnItemClickListener() {
             @Override
             public void onLeagueClick(ApiLeagueData leagueData) {
-                // Tạm thời hiển thị Toast.
-                // Việc điều hướng về Fragment từ Activity này cần cấu trúc lại navigation.
                 Toast.makeText(SearchActivity.this, "Đã nhấn vào giải: " + leagueData.getLeague().getName(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onTeamClick(Team team) {
-                // Tạm thời hiển thị Toast.
-                Toast.makeText(SearchActivity.this, "Đã nhấn vào đội: " + team.getName(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(SearchActivity.this, TeamDetailsActivity.class);
+                intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
+                startActivity(intent);
             }
         });
 

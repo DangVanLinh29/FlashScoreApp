@@ -1,7 +1,5 @@
 package com.example.flashscoreapp.ui.match_details.doidau;
 
-
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,14 +14,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.Match;
+import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.ui.home.MatchAdapter;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsViewModel;
+import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
-public class H2HFragment extends Fragment {
+// Thêm "implements" cho interface
+public class H2HFragment extends Fragment implements MatchAdapter.OnItemClickListener {
     private MatchDetailsViewModel viewModel;
     private RecentMatchesAdapter recentMatchesAdapter;
 
@@ -41,21 +43,10 @@ public class H2HFragment extends Fragment {
         recentMatchesAdapter = new RecentMatchesAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(recentMatchesAdapter);
+        // Gán listener là chính Fragment này
+        recentMatchesAdapter.setOnItemClickListener(this);
 
-        recentMatchesAdapter.setOnItemClickListener(new MatchAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Match match) {
-                Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
-                intent.putExtra("EXTRA_MATCH", match);
-                startActivity(intent);
-            }
-
-            @Override
-            public void onFavoriteClick(Match match, boolean isFavorite) {
-                // Không cần xử lý
-            }
-        });
-
+        // Lấy ViewModel chung từ Activity
         viewModel = new ViewModelProvider(requireActivity()).get(MatchDetailsViewModel.class);
 
         // Lắng nghe cặp danh sách trận đấu
@@ -63,6 +54,7 @@ public class H2HFragment extends Fragment {
             if (pair != null && pair.first != null && pair.second != null) {
                 // Lấy thông tin trận đấu hiện tại để có tên đội
                 Match currentMatch = ((MatchDetailsActivity) requireActivity()).getMatch();
+                if (currentMatch == null) return;
 
                 // Xây dựng danh sách hiển thị
                 List<Object> displayList = new ArrayList<>();
@@ -79,4 +71,18 @@ public class H2HFragment extends Fragment {
             }
         });
     }
+
+    // --- Triển khai các phương thức của OnItemClickListener ---
+    @Override
+    public void onItemClick(Match match) {
+        Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
+        intent.putExtra("EXTRA_MATCH", match);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onFavoriteClick(Match match, boolean isFavorite) {
+
+    }
+
 }

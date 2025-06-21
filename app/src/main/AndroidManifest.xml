@@ -34,8 +34,8 @@
             android:parentActivityName=".ui.MainActivity"
             android:theme="@style/Theme.FlashScoreApp.NoActionBar" />
         <activity
-            android:name=".ui.team_matches.TeamMatchesActivity"
-            android:parentActivityName=".ui.search.SearchActivity" />
+            android:name=".ui.team_details.TeamDetailsActivity"
+            android:parentActivityName=".ui.MainActivity" />
 
     </application>
 

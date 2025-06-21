@@ -2,33 +2,30 @@ package com.example.flashscoreapp.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.League;
-import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
 import com.example.flashscoreapp.data.model.domain.Match;
-
+import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
 import java.text.SimpleDateFormat;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HomeFragment extends Fragment {
 
@@ -55,9 +52,10 @@ public class HomeFragment extends Fragment {
         progressBar = view.findViewById(R.id.progress_bar);
         textNoMatches = view.findViewById(R.id.text_no_matches);
         recyclerViewDates = view.findViewById(R.id.recycler_view_dates);
+        recyclerViewMatches = view.findViewById(R.id.recycler_view_matches);
 
-        setupRecyclerView(view); // Hàm này giờ chỉ setup cho RecyclerView trận đấu
-        setupDateRecyclerView(); // Hàm mới để setup RecyclerView ngày
+        setupRecyclerView();
+        setupDateRecyclerView();
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         observeViewModel();
@@ -69,14 +67,14 @@ public class HomeFragment extends Fragment {
     private void setupDateRecyclerView() {
         List<Calendar> dates = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, -30); // Bắt đầu từ 30 ngày trước
+        calendar.add(Calendar.DAY_OF_YEAR, -30);
 
         for (int i = 0; i < 60; i++) {
             dates.add((Calendar) calendar.clone());
             calendar.add(Calendar.DAY_OF_YEAR, 1);
         }
 
-        int todayPosition = 30; // Vị trí của ngày hôm nay trong danh sách
+        int todayPosition = 30;
 
         dateAdapter = new DateAdapter(dates, todayPosition, selectedDate -> {
             String dateForApi = apiDateFormat.format(selectedDate.getTime());
@@ -88,15 +86,10 @@ public class HomeFragment extends Fragment {
         recyclerViewDates.setAdapter(dateAdapter);
 
         recyclerViewDates.post(() -> {
-            // Đầu tiên, cuộn đến vị trí "Hôm nay" để đảm bảo nó nằm trong vùng hiển thị.
             layoutManager.scrollToPosition(todayPosition);
-
-            // Post thêm một tác vụ nữa để chạy sau khi việc cuộn ở trên hoàn tất.
-            // Điều này đảm bảo rằng view của "Hôm nay" đã được tạo.
             recyclerViewDates.post(() -> {
                 View view = layoutManager.findViewByPosition(todayPosition);
                 if (view != null) {
-                    // Bây giờ, ta có thể lấy chiều rộng của view và tính toán offset để căn giữa.
                     int offset = recyclerViewDates.getWidth() / 2 - view.getWidth() / 2;
                     layoutManager.scrollToPositionWithOffset(todayPosition, offset);
                 }
@@ -104,10 +97,12 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void setupRecyclerView(View view) {
-        recyclerViewMatches = view.findViewById(R.id.recycler_view_matches);
+    private void setupRecyclerView() {
         homeGroupedAdapter = new HomeGroupedAdapter();
+        recyclerViewMatches.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerViewMatches.setAdapter(homeGroupedAdapter);
 
+        // Cài đặt listener đã được đơn giản hóa
         homeGroupedAdapter.setOnItemClickListener(new MatchAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Match match) {
@@ -125,33 +120,38 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-
-
-        recyclerViewMatches.setAdapter(homeGroupedAdapter);
     }
 
     private void observeViewModel() {
-        progressBar.setVisibility(View.VISIBLE);
-        recyclerViewMatches.setVisibility(View.GONE);
-        textNoMatches.setVisibility(View.GONE);
-
-        homeViewModel.getMatches().observe(getViewLifecycleOwner(), matches -> {
-            progressBar.setVisibility(View.GONE);
-            if (matches != null && !matches.isEmpty()) {
-                recyclerViewMatches.setVisibility(View.VISIBLE);
-                textNoMatches.setVisibility(View.GONE);
-
-                // Nhóm các trận đấu và cập nhật adapter
-                List<Object> groupedList = groupMatchesByLeague(matches);
-                homeGroupedAdapter.setDisplayList(groupedList);
-
-            } else {
+        // Lắng nghe trạng thái loading
+        homeViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading) {
+                progressBar.setVisibility(View.VISIBLE);
                 recyclerViewMatches.setVisibility(View.GONE);
-                textNoMatches.setVisibility(View.VISIBLE);
-                homeGroupedAdapter.setDisplayList(new ArrayList<>()); // Xóa dữ liệu cũ
+                textNoMatches.setVisibility(View.GONE);
+            } else {
+                progressBar.setVisibility(View.GONE);
             }
         });
 
+        // Lắng nghe danh sách các trận đấu
+        homeViewModel.getMatches().observe(getViewLifecycleOwner(), matches -> {
+            if (homeViewModel.getIsLoading().getValue() != null && homeViewModel.getIsLoading().getValue()) {
+                return; // Nếu đang loading thì không làm gì cả
+            }
+            if (matches != null && !matches.isEmpty()) {
+                recyclerViewMatches.setVisibility(View.VISIBLE);
+                textNoMatches.setVisibility(View.GONE);
+                List<Object> groupedList = groupMatchesByLeague(matches);
+                homeGroupedAdapter.setDisplayList(groupedList);
+            } else {
+                recyclerViewMatches.setVisibility(View.GONE);
+                textNoMatches.setVisibility(View.VISIBLE);
+                homeGroupedAdapter.setDisplayList(new ArrayList<>());
+            }
+        });
+
+        // Lắng nghe danh sách yêu thích
         homeViewModel.getFavoriteMatches().observe(getViewLifecycleOwner(), favoriteMatches -> {
             if (favoriteMatches != null) {
                 Set<Integer> favoriteIds = favoriteMatches.stream()
@@ -172,8 +172,8 @@ public class HomeFragment extends Fragment {
 
         List<Object> displayList = new ArrayList<>();
         for (Map.Entry<League, List<Match>> entry : groupedMap.entrySet()) {
-            displayList.add(entry.getKey()); // Thêm tiêu đề giải đấu
-            displayList.addAll(entry.getValue()); // Thêm các trận đấu của giải đó
+            displayList.add(entry.getKey());
+            displayList.addAll(entry.getValue());
         }
         return displayList;
     }

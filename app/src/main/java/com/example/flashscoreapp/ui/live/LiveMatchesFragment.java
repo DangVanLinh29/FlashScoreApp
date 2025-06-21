@@ -10,24 +10,31 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.League;
 import com.example.flashscoreapp.data.model.domain.Match;
+import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.ui.home.HomeGroupedAdapter;
+import com.example.flashscoreapp.ui.home.HomeViewModel;
 import com.example.flashscoreapp.ui.home.MatchAdapter;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
+import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-public class LiveMatchesFragment extends Fragment {
+public class LiveMatchesFragment extends Fragment implements MatchAdapter.OnItemClickListener {
 
     private LiveMatchesViewModel liveMatchesViewModel;
+    private HomeViewModel homeViewModel;
     private HomeGroupedAdapter groupedAdapter;
     private RecyclerView recyclerView;
     private TextView textNoMatches;
@@ -46,34 +53,22 @@ public class LiveMatchesFragment extends Fragment {
         textNoMatches = view.findViewById(R.id.text_empty_message);
         textNoMatches.setText("Không có trận đấu nào đang trực tiếp.");
 
-        setupRecyclerView();
-
         liveMatchesViewModel = new ViewModelProvider(this).get(LiveMatchesViewModel.class);
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
+        setupRecyclerView();
         observeViewModel();
     }
 
     private void setupRecyclerView() {
         groupedAdapter = new HomeGroupedAdapter();
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(groupedAdapter);
-        groupedAdapter.setOnItemClickListener(new MatchAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Match match) {
-                Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
-                intent.putExtra("EXTRA_MATCH", match);
-                startActivity(intent);
-            }
-
-            @Override
-            public void onFavoriteClick(Match match, boolean isFavorite) {
-                // Có thể thêm logic xử lý Yêu thích ở đây nếu cần
-            }
-        });
+        // Gán listener là chính Fragment này
+        groupedAdapter.setOnItemClickListener(this);
     }
 
     private void observeViewModel() {
-        textNoMatches.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.VISIBLE);
-
         liveMatchesViewModel.getLiveMatches().observe(getViewLifecycleOwner(), matches -> {
             if (matches != null && !matches.isEmpty()) {
                 recyclerView.setVisibility(View.VISIBLE);
@@ -83,6 +78,16 @@ public class LiveMatchesFragment extends Fragment {
             } else {
                 recyclerView.setVisibility(View.GONE);
                 textNoMatches.setVisibility(View.VISIBLE);
+                groupedAdapter.setDisplayList(new ArrayList<>());
+            }
+        });
+
+        homeViewModel.getFavoriteMatches().observe(getViewLifecycleOwner(), favoriteMatches -> {
+            if (favoriteMatches != null) {
+                Set<Integer> favoriteIds = favoriteMatches.stream()
+                        .map(Match::getMatchId)
+                        .collect(Collectors.toSet());
+                groupedAdapter.setFavoriteMatchIds(favoriteIds);
             }
         });
     }
@@ -102,4 +107,22 @@ public class LiveMatchesFragment extends Fragment {
         }
         return displayList;
     }
+
+    @Override
+    public void onItemClick(Match match) {
+        Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
+        intent.putExtra("EXTRA_MATCH", match);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onFavoriteClick(Match match, boolean isFavorite) {
+        if (isFavorite) {
+            homeViewModel.removeFavorite(match);
+        } else {
+            homeViewModel.addFavorite(match);
+        }
+    }
+
+
 }

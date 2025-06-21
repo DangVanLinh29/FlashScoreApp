@@ -23,7 +23,6 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private List<Object> items = new ArrayList<>();
     private MatchAdapter.OnItemClickListener matchClickListener;
-    // Thêm Set để lưu ID các trận yêu thích
     private Set<Integer> favoriteMatchIds = new HashSet<>();
 
     public void setOnItemClickListener(MatchAdapter.OnItemClickListener listener) {
@@ -36,7 +35,6 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyDataSetChanged();
     }
 
-    // Thêm hàm này để nhận danh sách yêu thích từ Fragment
     @SuppressLint("NotifyDataSetChanged")
     public void setFavoriteMatchIds(Set<Integer> favoriteMatchIds) {
         this.favoriteMatchIds = favoriteMatchIds;
@@ -58,8 +56,9 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (viewType == TYPE_HEADER) {
             View view = inflater.inflate(R.layout.item_round_header, parent, false);
             return new HeaderViewHolder(view);
-        } else {
+        } else { // TYPE_MATCH
             View view = inflater.inflate(R.layout.item_match, parent, false);
+            // Vẫn dùng lại MatchViewHolder chuẩn
             return new MatchAdapter.MatchViewHolder(view);
         }
     }
@@ -67,15 +66,28 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder.getItemViewType() == TYPE_HEADER) {
-            HeaderViewHolder headerViewHolder = (HeaderViewHolder) holder;
-            headerViewHolder.bind((RoundHeader) items.get(position));
+            ((HeaderViewHolder) holder).bind((RoundHeader) items.get(position));
         } else {
             MatchAdapter.MatchViewHolder matchViewHolder = (MatchAdapter.MatchViewHolder) holder;
             Match match = (Match) items.get(position);
-            // Kiểm tra xem trận đấu này có trong danh sách yêu thích không
             boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
-            // Gọi hàm bind với trạng thái isFavorite chính xác
-            matchViewHolder.bind(match, isFavorite, matchClickListener);
+
+            // --- SỬA LẠI TẠI ĐÂY ---
+            // 1. Gọi hàm bind chỉ với 2 tham số
+            matchViewHolder.bind(match, isFavorite);
+
+            // 2. Gán sự kiện click trực tiếp ở đây
+            holder.itemView.setOnClickListener(v -> {
+                if (matchClickListener != null) {
+                    matchClickListener.onItemClick(match);
+                }
+            });
+
+            matchViewHolder.imageViewFavorite.setOnClickListener(v -> {
+                if (matchClickListener != null) {
+                    matchClickListener.onFavoriteClick(match, isFavorite);
+                }
+            });
         }
     }
 

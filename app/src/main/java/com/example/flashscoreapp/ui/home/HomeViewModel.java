@@ -2,11 +2,11 @@ package com.example.flashscoreapp.ui.home;
 
 import android.app.Application;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData; // Thêm import này
 import com.example.flashscoreapp.data.model.domain.Match;
 import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.data.model.local.FavoriteTeam;
@@ -22,11 +22,19 @@ public class HomeViewModel extends AndroidViewModel {
     private final LiveData<List<Match>> favoriteMatches;
     private final LiveData<List<FavoriteTeam>> favoriteTeams;
 
+    // Thêm LiveData để quản lý trạng thái loading
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
+
     public HomeViewModel(@NonNull Application application) {
         super(application);
         this.matchRepository = new MatchRepository(application);
         this.favoriteMatches = matchRepository.getAllFavoriteMatches();
         this.favoriteTeams = matchRepository.getAllFavoriteTeams();
+    }
+
+    // Thêm hàm getter cho isLoading
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
     }
 
     public LiveData<List<Match>> getFavoriteMatches() {
@@ -52,7 +60,11 @@ public class HomeViewModel extends AndroidViewModel {
     public void removeFavoriteTeam(Team team) {
         matchRepository.removeFavoriteTeam(team);
     }
+
     public void fetchMatchesForDate(String date) {
+        // Khi bắt đầu tải, đặt isLoading thành true
+        isLoading.setValue(true);
+
         LiveData<List<Match>> newDataSource = matchRepository.getMatchesByDateFromApi(date);
 
         if (currentDataSource != null) {
@@ -61,14 +73,12 @@ public class HomeViewModel extends AndroidViewModel {
 
         currentDataSource = newDataSource;
         matches.addSource(currentDataSource, matchList -> {
-            // --- THÊM LOG TẠI ĐÂY ---
-            Log.d("ViewModelLog", "MediatorLiveData updated with " + (matchList != null ? matchList.size() : 0) + " matches.");
-
+            // Khi có dữ liệu về (kể cả null), đặt isLoading thành false
+            isLoading.setValue(false);
             matches.setValue(matchList);
         });
     }
 
-    // Trả về LiveData, không thay đổi
     public LiveData<List<Match>> getMatches() {
         return matches;
     }
