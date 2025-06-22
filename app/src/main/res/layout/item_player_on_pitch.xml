@@ -6,13 +6,11 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <ImageView
+    <View
         android:id="@+id/image_player_photo"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="@drawable/circle_background"
-        android:scaleType="centerCrop"
-        tools:src="@drawable/ic_person"/>
+        android:background="@drawable/circle_background" />
 
     <TextView
         android:id="@+id/text_player_number_on_pitch"

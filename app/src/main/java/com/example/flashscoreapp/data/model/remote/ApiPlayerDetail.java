@@ -8,12 +8,12 @@ public class ApiPlayerDetail {
     @SerializedName("name")
     private String name;
     @SerializedName("number")
-    private int number;
+    private Integer number;
     @SerializedName("pos")
     private String pos; // Vị trí: G, D, M, F
 
     public int getId() { return id; }
     public String getName() { return name; }
-    public int getNumber() { return number; }
+    public Integer getNumber() { return number; }
     public String getPos() { return pos; }
 }

@@ -12,21 +12,19 @@ public class ApiLeague implements Serializable {
     private String logo;
     @SerializedName("round")
     private String round;
-
     @SerializedName("country")
     private String country;
 
-    public int getId() {
-        return id;
-    }
-    public String getName() {
-        return name;
-    }
-    public String getLogo() {
-        return logo;
-    }
-    public String getRound() {
-        return round;
-    }
+    // THÊM TRƯỜNG MỚI TỪ API
+    @SerializedName("season")
+    private int season;
+
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getLogo() { return logo; }
+    public String getRound() { return round; }
     public String getCountry() { return country; }
+
+    // THÊM GETTER MỚI
+    public int getSeason() { return season; }
 }

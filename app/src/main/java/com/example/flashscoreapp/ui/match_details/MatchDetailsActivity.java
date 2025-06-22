@@ -120,11 +120,9 @@ public class MatchDetailsActivity extends AppCompatActivity {
         ViewPager2 viewPager = findViewById(R.id.view_pager_match_details);
         TabLayout tabLayout = findViewById(R.id.tab_layout_match_details);
 
-        // Lấy leagueId và season từ trận đấu hiện tại
+        // Lấy leagueId và seasonYear trực tiếp từ đối tượng Match
         int leagueId = match.getLeague().getId();
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(match.getMatchTime());
-        int seasonYear = cal.get(Calendar.YEAR);
+        int seasonYear = match.getSeason(); // <-- KHÔNG CẦN ĐOÁN NỮA!
 
         viewPager.setAdapter(new MatchDetailsPagerAdapter(this, leagueId, seasonYear));
 
