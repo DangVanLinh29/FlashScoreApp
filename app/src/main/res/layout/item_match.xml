@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:paddingVertical="12dp"
     android:paddingHorizontal="16dp"
-    android:background="?attr/selectableItemBackground">
+    android:background="@color/surface_background">
 
     <TextView
         android:id="@+id/text_left_column"
@@ -34,7 +34,8 @@
 
         <LinearLayout
             android:id="@+id/layout_home_team"
-            android:layout_width="wrap_content"  android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
             <ImageView
@@ -48,12 +49,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
                 tools:text="Manchester United"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/layout_away_team"
-            android:layout_width="wrap_content"  android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical">
@@ -68,6 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
                 tools:text="Liverpool"/>
         </LinearLayout>
     </LinearLayout>
@@ -89,6 +93,7 @@
             android:gravity="center"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
             tools:text="2 - 1" />
 
         <ImageView

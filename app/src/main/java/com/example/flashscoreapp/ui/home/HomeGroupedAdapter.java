@@ -68,11 +68,11 @@ public class HomeGroupedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder.getItemViewType() == TYPE_LEAGUE_HEADER) {
             ((LeagueHeaderViewHolder) holder).bind((League) displayList.get(position));
         } else {
-            // SỬA LẠI LOGIC NÀY CHO ĐÚNG
+            // Logic đã được kết hợp và sửa lại cho đúng
             MatchAdapter.MatchViewHolder matchViewHolder = (MatchAdapter.MatchViewHolder) holder;
             Match match = (Match) displayList.get(position);
             boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
-            // Gọi hàm bind với đủ 3 tham số
+            // Gọi hàm bind với đủ 3 tham số (bao gồm cả listener)
             matchViewHolder.bind(match, isFavorite, listener);
         }
     }

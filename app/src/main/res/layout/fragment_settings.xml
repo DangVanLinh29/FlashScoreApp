@@ -20,9 +20,19 @@
         </RelativeLayout>
 
         <TextView style="@style/SettingsHeader" android:text="Giao diện" />
-        <RelativeLayout style="@style/SettingsItemContainer">
-            <TextView style="@style/SettingsItem.Title" android:drawableStart="@drawable/ic_lightdark" android:text="Chế độ sáng / Chế độ tối" />
-            <TextView style="@style/SettingsItem.Value" android:text="Hệ thống" />
+        <RelativeLayout
+            android:id="@+id/layout_theme_setting"
+            style="@style/SettingsItemContainer">
+
+            <TextView
+                style="@style/SettingsItem.Title"
+                android:drawableStart="@drawable/ic_lightdark"
+                android:text="Chế độ sáng / Chế độ tối" />
+
+            <TextView
+                android:id="@+id/text_current_theme"
+                style="@style/SettingsItem.Value"
+                tools:text="Hệ thống" />
         </RelativeLayout>
 
         <TextView style="@style/SettingsHeader" android:text="Khác" />
