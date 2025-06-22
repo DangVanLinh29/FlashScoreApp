@@ -4,9 +4,9 @@
     android:id="@+id/text_group_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#E0E0E0"
+    android:background="@color/surface_background"
     android:padding="12dp"
-    android:textColor="@android:color/black"
+    android:textColor="?android:attr/textColorPrimary"
     android:textSize="16sp"
     android:textStyle="bold"
     tools:text="Bảng A" />

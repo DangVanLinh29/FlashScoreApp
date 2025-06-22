@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="@color/window_background">
 
         <ImageView
             android:id="@+id/image_league_logo"
@@ -46,7 +47,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="22dp">
+        android:paddingHorizontal="22dp"
+        android:background="@color/surface_background">
 
         <View
             android:id="@+id/start_cap"
@@ -116,7 +118,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:tabIndicatorColor="@color/selected_date_color"
-        app:tabSelectedTextColor="@color/selected_date_color"/>
+        app:tabSelectedTextColor="@color/selected_date_color"
+        android:background="@color/surface_background"/>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager_main"

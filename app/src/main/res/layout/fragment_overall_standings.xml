@@ -10,7 +10,7 @@
         android:id="@+id/header_standings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#F0F0F0"
+        android:background="@color/window_background"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="4dp"
@@ -56,6 +56,7 @@
         android:id="@+id/recycler_view_standings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/item_standing" />
+        tools:listitem="@layout/item_standing"
+        android:background="@color/surface_background"/>
 
 </LinearLayout>

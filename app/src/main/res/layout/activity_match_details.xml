@@ -31,7 +31,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="24dp"
-                android:paddingVertical="16dp">
+                android:paddingVertical="16dp"
+                android:background="@color/surface_background">
 
                 <ImageView
                     android:id="@+id/image_favorite_home"
@@ -124,12 +125,15 @@
                 app:tabMode="scrollable"
                 app:tabIndicatorColor="@color/selected_date_color"
                 app:tabSelectedTextColor="@color/selected_date_color"
-                app:tabTextColor="?android:attr/textColorSecondary" />
+                app:tabTextColor="?android:attr/textColorSecondary"
+                android:background="@color/window_background"
+                />
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/view_pager_match_details"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:background="@color/window_background"/>
 
 
 

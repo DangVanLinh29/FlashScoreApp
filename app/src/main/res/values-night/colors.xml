@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="backgroudTop">#212121</color>
-    <color name="window_background">#121212</color> <color name="surface_background">#1E1E1E</color>
+    <color name="progress_bar_background">#031320</color>
+    <color name="progress_bar_progress">#031320</color>
+    <color name="backgroudTop">#031320</color>
+    <color name="window_background">#011e26</color>
+    <color name="window_background_top">#031320</color>
+    <color name="surface_background">#000a0c</color>
+    <color name="bottom_nav_background">#031320</color>
+    <color name="bottom_nav_indicator">#031320</color>
+    <color name="bottom_nav_item_selected">#ca0139</color>
+    <color name="bottom_nav_item_unselected">#FFFFFF</color>
 </resources>

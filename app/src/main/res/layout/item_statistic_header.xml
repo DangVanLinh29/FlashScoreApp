@@ -12,5 +12,5 @@
     android:textSize="14sp"
     android:textAllCaps="true"
     android:textColor="?android:attr/textColorSecondary"
-    android:background="?android:colorBackground"
+    android:background="@color/surface_background"
     tools:text="TẤN CÔNG" />

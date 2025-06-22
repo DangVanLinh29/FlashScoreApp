@@ -54,4 +54,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+    <style name="App.BottomNavigation.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/bottom_nav_indicator</item>
+    </style>
 </resources>

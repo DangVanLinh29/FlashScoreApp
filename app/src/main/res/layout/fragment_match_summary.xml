@@ -21,13 +21,9 @@
         android:id="@+id/layout_statistics_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        android:background="@color/window_background"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_marginTop="8dp"
-        android:background="#F5F5F5"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_summary"
@@ -35,7 +31,8 @@
         android:layout_height="wrap_content"
         android:nestedScrollingEnabled="false"
         tools:itemCount="5"
-        tools:listitem="@layout/item_match_event" />
+        tools:listitem="@layout/item_match_event"
+        android:background="@color/surface_background"/>
 
 
 
