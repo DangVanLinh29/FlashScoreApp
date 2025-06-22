@@ -9,4 +9,5 @@
     <color name="progress_bar_background">#F0F0F0</color>
     <color name="progress_bar_progress">#212121</color>
     <color name="season_date_text">#616161</color>
+    <color name="window_background">#F0F2F5</color> <color name="surface_background">#FFFFFF</color>
 </resources>

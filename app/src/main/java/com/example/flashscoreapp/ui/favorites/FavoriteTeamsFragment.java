@@ -24,7 +24,6 @@ import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,4 +120,17 @@ public class FavoriteTeamsFragment extends Fragment implements MatchAdapter.OnIt
         }
     }
 
+    // --- THÊM PHƯƠNG THỨC CÒN THIẾU VÀO ĐÂY ---
+    @Override
+    public void onTeamClick(Team team, Match matchContext) {
+        Intent intent = new Intent(getActivity(), TeamDetailsActivity.class);
+        intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
+        if (matchContext != null && matchContext.getLeague() != null) {
+            intent.putExtra(TeamDetailsActivity.EXTRA_LEAGUE_ID, matchContext.getLeague().getId());
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(matchContext.getMatchTime());
+            intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, cal.get(Calendar.YEAR));
+        }
+        startActivity(intent);
+    }
 }

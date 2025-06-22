@@ -10,23 +10,21 @@ public class MatchDetailsViewModelFactory implements ViewModelProvider.Factory {
     private final int matchId;
     private final int homeTeamId;
     private final int awayTeamId;
-    private final int seasonYear; // Thêm trường seasonYear
 
-    // Sửa constructor để nhận 5 tham số
-    public MatchDetailsViewModelFactory(Application application, int matchId, int homeTeamId, int awayTeamId, int seasonYear) {
+    // Constructor chỉ nhận 4 tham số
+    public MatchDetailsViewModelFactory(Application application, int matchId, int homeTeamId, int awayTeamId) {
         this.application = application;
         this.matchId = matchId;
         this.homeTeamId = homeTeamId;
         this.awayTeamId = awayTeamId;
-        this.seasonYear = seasonYear; // Gán giá trị
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MatchDetailsViewModel.class)) {
-
-            return (T) new MatchDetailsViewModel(application, matchId, homeTeamId, awayTeamId, seasonYear);
+            // Gọi constructor của ViewModel với 4 tham số
+            return (T) new MatchDetailsViewModel(application, matchId, homeTeamId, awayTeamId);
         }
         throw new IllegalArgumentException("Unknown ViewModel class");
     }

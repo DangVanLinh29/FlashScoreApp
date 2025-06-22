@@ -114,15 +114,17 @@ public class TeamSquadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             // Lấy số áo từ trong statistics
             List<ApiPlayerStatistics> stats = playerResponse.getStatistics();
+            Integer number = null;
             if (stats != null && !stats.isEmpty() && stats.get(0).getGames() != null) {
-                Integer number = stats.get(0).getGames().getNumber(); // Giờ đây là Integer
-                if (number != null) {
-                    playerNumber.setText(String.valueOf(number));
-                } else {
-                    playerNumber.setText("-");
-                }
+                number = stats.get(0).getGames().getNumber();
+            }
+
+            if (number != null) {
+                playerNumber.setText(String.valueOf(number));
+                playerNumber.setVisibility(View.VISIBLE);
             } else {
                 playerNumber.setText("-");
+                playerNumber.setVisibility(View.VISIBLE);
             }
         }
     }

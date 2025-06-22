@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.League;
 import com.example.flashscoreapp.data.model.domain.Match;
+import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
+import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements MatchAdapter.OnItemClickListener {
 
     private HomeViewModel homeViewModel;
     private RecyclerView recyclerViewMatches;
@@ -60,7 +62,6 @@ public class HomeFragment extends Fragment {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         observeViewModel();
 
-        // Tải trận đấu cho ngày hôm nay khi khởi tạo
         homeViewModel.fetchMatchesForDate(apiDateFormat.format(Calendar.getInstance().getTime()));
     }
 
@@ -88,9 +89,9 @@ public class HomeFragment extends Fragment {
         recyclerViewDates.post(() -> {
             layoutManager.scrollToPosition(todayPosition);
             recyclerViewDates.post(() -> {
-                View view = layoutManager.findViewByPosition(todayPosition);
-                if (view != null) {
-                    int offset = recyclerViewDates.getWidth() / 2 - view.getWidth() / 2;
+                View v = layoutManager.findViewByPosition(todayPosition);
+                if (v != null) {
+                    int offset = recyclerViewDates.getWidth() / 2 - v.getWidth() / 2;
                     layoutManager.scrollToPositionWithOffset(todayPosition, offset);
                 }
             });
@@ -99,31 +100,12 @@ public class HomeFragment extends Fragment {
 
     private void setupRecyclerView() {
         homeGroupedAdapter = new HomeGroupedAdapter();
+        homeGroupedAdapter.setOnItemClickListener(this);
         recyclerViewMatches.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewMatches.setAdapter(homeGroupedAdapter);
-
-        // Cài đặt listener đã được đơn giản hóa
-        homeGroupedAdapter.setOnItemClickListener(new MatchAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Match match) {
-                Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
-                intent.putExtra("EXTRA_MATCH", match);
-                startActivity(intent);
-            }
-
-            @Override
-            public void onFavoriteClick(Match match, boolean isFavorite) {
-                if (isFavorite) {
-                    homeViewModel.removeFavorite(match);
-                } else {
-                    homeViewModel.addFavorite(match);
-                }
-            }
-        });
     }
 
     private void observeViewModel() {
-        // Lắng nghe trạng thái loading
         homeViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
             if (isLoading) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -134,24 +116,21 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        // Lắng nghe danh sách các trận đấu
         homeViewModel.getMatches().observe(getViewLifecycleOwner(), matches -> {
-            if (homeViewModel.getIsLoading().getValue() != null && homeViewModel.getIsLoading().getValue()) {
-                return; // Nếu đang loading thì không làm gì cả
-            }
-            if (matches != null && !matches.isEmpty()) {
-                recyclerViewMatches.setVisibility(View.VISIBLE);
-                textNoMatches.setVisibility(View.GONE);
-                List<Object> groupedList = groupMatchesByLeague(matches);
-                homeGroupedAdapter.setDisplayList(groupedList);
-            } else {
-                recyclerViewMatches.setVisibility(View.GONE);
-                textNoMatches.setVisibility(View.VISIBLE);
-                homeGroupedAdapter.setDisplayList(new ArrayList<>());
+            if (homeViewModel.getIsLoading().getValue() != null && !homeViewModel.getIsLoading().getValue()) {
+                if (matches != null && !matches.isEmpty()) {
+                    recyclerViewMatches.setVisibility(View.VISIBLE);
+                    textNoMatches.setVisibility(View.GONE);
+                    List<Object> groupedList = groupMatchesByLeague(matches);
+                    homeGroupedAdapter.setDisplayList(groupedList);
+                } else {
+                    recyclerViewMatches.setVisibility(View.GONE);
+                    textNoMatches.setVisibility(View.VISIBLE);
+                    homeGroupedAdapter.setDisplayList(new ArrayList<>());
+                }
             }
         });
 
-        // Lắng nghe danh sách yêu thích
         homeViewModel.getFavoriteMatches().observe(getViewLifecycleOwner(), favoriteMatches -> {
             if (favoriteMatches != null) {
                 Set<Integer> favoriteIds = favoriteMatches.stream()
@@ -169,12 +148,40 @@ public class HomeFragment extends Fragment {
                         LinkedHashMap::new,
                         Collectors.toList()
                 ));
-
         List<Object> displayList = new ArrayList<>();
         for (Map.Entry<League, List<Match>> entry : groupedMap.entrySet()) {
             displayList.add(entry.getKey());
             displayList.addAll(entry.getValue());
         }
         return displayList;
+    }
+
+    @Override
+    public void onItemClick(Match match) {
+        Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
+        intent.putExtra("EXTRA_MATCH", match);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onFavoriteClick(Match match, boolean isFavorite) {
+        if (isFavorite) {
+            homeViewModel.removeFavorite(match);
+        } else {
+            homeViewModel.addFavorite(match);
+        }
+    }
+
+    @Override
+    public void onTeamClick(Team team, Match matchContext) {
+        Intent intent = new Intent(getActivity(), TeamDetailsActivity.class);
+        intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
+        if (matchContext != null && matchContext.getLeague() != null) {
+            intent.putExtra(TeamDetailsActivity.EXTRA_LEAGUE_ID, matchContext.getLeague().getId());
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(matchContext.getMatchTime());
+            intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, cal.get(Calendar.YEAR));
+        }
+        startActivity(intent);
     }
 }

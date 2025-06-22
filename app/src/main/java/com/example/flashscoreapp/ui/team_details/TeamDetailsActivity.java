@@ -33,8 +33,7 @@ public class TeamDetailsActivity extends AppCompatActivity {
         // 1. Lấy dữ liệu từ Intent
         team = (Team) getIntent().getSerializableExtra(EXTRA_TEAM);
         int leagueId = getIntent().getIntExtra(EXTRA_LEAGUE_ID, 0);
-        // Lấy seasonYear từ intent. Nếu không có, dùng năm hiện tại làm mặc định.
-        // Dữ liệu này chủ yếu để truyền cho tab "Bảng Xếp Hạng".
+
         int seasonYear = getIntent().getIntExtra(EXTRA_SEASON_YEAR, Calendar.getInstance().get(Calendar.YEAR));
 
         // 2. Kiểm tra dữ liệu đầu vào
@@ -46,7 +45,7 @@ public class TeamDetailsActivity extends AppCompatActivity {
 
         // 3. Khởi tạo ViewModel (dùng Factory không cần season)
         // ViewModel sẽ tự tính toán mùa giải bóng đá phù hợp bên trong nó.
-        TeamDetailsViewModelFactory factory = new TeamDetailsViewModelFactory(getApplication(), team.getId());
+        TeamDetailsViewModelFactory factory = new TeamDetailsViewModelFactory(getApplication(), team.getId(), seasonYear);
         viewModel = new ViewModelProvider(this, factory).get(TeamDetailsViewModel.class);
 
         // 4. Gọi các hàm setup

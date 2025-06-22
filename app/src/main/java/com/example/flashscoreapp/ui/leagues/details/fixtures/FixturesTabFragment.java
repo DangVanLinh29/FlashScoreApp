@@ -70,7 +70,6 @@ public class FixturesTabFragment extends Fragment implements MatchAdapter.OnItem
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
 
-        // Gán listener là chính Fragment này
         adapter.setOnItemClickListener(this);
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
@@ -140,6 +139,12 @@ public class FixturesTabFragment extends Fragment implements MatchAdapter.OnItem
         }
     }
 
-    // Sửa lại phương thức này cho đúng với interface
-
+    @Override
+    public void onTeamClick(Team team, Match matchContext) {
+        Intent intent = new Intent(getActivity(), TeamDetailsActivity.class);
+        intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
+        intent.putExtra(TeamDetailsActivity.EXTRA_LEAGUE_ID, this.leagueId);
+        intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, this.seasonYear);
+        startActivity(intent);
+    }
 }

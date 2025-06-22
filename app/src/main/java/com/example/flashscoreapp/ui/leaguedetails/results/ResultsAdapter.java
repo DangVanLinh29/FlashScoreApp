@@ -58,7 +58,7 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return new HeaderViewHolder(view);
         } else { // TYPE_MATCH
             View view = inflater.inflate(R.layout.item_match, parent, false);
-            // Vẫn dùng lại MatchViewHolder chuẩn
+            // Dùng lại MatchViewHolder chuẩn
             return new MatchAdapter.MatchViewHolder(view);
         }
     }
@@ -72,22 +72,8 @@ public class ResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             Match match = (Match) items.get(position);
             boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
 
-            // --- SỬA LẠI TẠI ĐÂY ---
-            // 1. Gọi hàm bind chỉ với 2 tham số
-            matchViewHolder.bind(match, isFavorite);
-
-            // 2. Gán sự kiện click trực tiếp ở đây
-            holder.itemView.setOnClickListener(v -> {
-                if (matchClickListener != null) {
-                    matchClickListener.onItemClick(match);
-                }
-            });
-
-            matchViewHolder.imageViewFavorite.setOnClickListener(v -> {
-                if (matchClickListener != null) {
-                    matchClickListener.onFavoriteClick(match, isFavorite);
-                }
-            });
+            // Gọi hàm bind với 3 tham số để xử lý được tất cả các loại click
+            matchViewHolder.bind(match, isFavorite, matchClickListener);
         }
     }
 

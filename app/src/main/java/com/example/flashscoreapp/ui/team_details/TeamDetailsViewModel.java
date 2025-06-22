@@ -19,25 +19,20 @@ public class TeamDetailsViewModel extends AndroidViewModel {
     private final LiveData<ApiTeamResponse> teamDetails;
     private final LiveData<List<ApiPlayerResponse>> squad;
 
-    public TeamDetailsViewModel(@NonNull Application application, int teamId) {
+    // Sửa constructor để nhận seasonYear
+    public TeamDetailsViewModel(@NonNull Application application, int teamId, int seasonYear) {
         super(application);
         MatchRepository repository = new MatchRepository(application);
 
-        // Tính toán mùa giải gần nhất để lấy Kết quả và Đội hình
-        Calendar now = Calendar.getInstance();
-        int year = now.get(Calendar.YEAR);
-        int month = now.get(Calendar.MONTH);
-        int footballSeasonYear = (month < 7) ? (year - 1) : year;
 
         // Lấy thông tin chi tiết của đội
         teamDetails = repository.getTeamDetails(teamId);
 
-        // Lấy Đội hình và Kết quả theo mùa giải gần nhất
-        squad = repository.getPlayersForTeam(teamId, footballSeasonYear);
-        pastMatches = repository.getPastResultsForTeam(teamId, footballSeasonYear);
+        // Lấy Đội hình và Kết quả theo mùa giải được truyền vào
+        squad = repository.getPlayersForTeam(teamId, seasonYear);
+        pastMatches = repository.getPastResultsForTeam(teamId, seasonYear);
 
-        // LẤY LỊCH THI ĐẤU THEO CÁCH MỚI: Lấy 10 trận sắp tới, không phụ thuộc mùa giải
-        // Đảm bảo bạn có hàm getNextFixturesForTeam trong Repository và ApiService
+        // Lấy lịch thi đấu (giữ nguyên)
         upcomingFixtures = repository.getNextFixturesForTeam(teamId, 10);
     }
 

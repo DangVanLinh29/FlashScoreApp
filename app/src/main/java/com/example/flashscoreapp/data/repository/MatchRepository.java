@@ -22,7 +22,7 @@ import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.data.model.local.FavoriteMatch;
 import com.example.flashscoreapp.data.model.local.FavoriteTeam;
 import com.example.flashscoreapp.data.model.remote.*;
-import com.example.flashscoreapp.util.SessionManager; // Đảm bảo đã import
+import com.example.flashscoreapp.util.SessionManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,8 +45,8 @@ public class MatchRepository {
     private final MatchDao matchDao;
     private final TeamDao teamDao;
     private final ExecutorService executorService;
-    private final SessionManager sessionManager; // <<--- DÒNG NÀY BỊ THIẾU TRONG FILE CỦA BẠN
-    private final String API_KEY = "5e88b7e40emsh79a567711143f87p119b30jsnbc4b0f951a57";
+    private final SessionManager sessionManager; // Giữ lại khai báo này
+    private final String API_KEY = "5e88b7e40emsh79a567711143f87p119b30jsnbc4b0f951a57"; // Giữ lại API Key của bạn
     private final String API_HOST = "api-football-v1.p.rapidapi.com";
 
     public MatchRepository(Application application) {
@@ -55,10 +55,8 @@ public class MatchRepository {
         this.matchDao = database.matchDao();
         this.teamDao = database.teamDao();
         this.executorService = Executors.newSingleThreadExecutor();
-        this.sessionManager = new SessionManager(application); // Dòng này sẽ hết báo lỗi
+        this.sessionManager = new SessionManager(application);
     }
-
-    // ... PHẦN CÒN LẠI CỦA LỚP GIỮ NGUYÊN ...
 
     public LiveData<List<Match>> getAllFavoriteMatches() {
         String email = sessionManager.getUserEmail();
@@ -239,6 +237,7 @@ public class MatchRepository {
 
                 long matchTime = sdf.parse(apiMatch.getFixture().getDate()).getTime();
 
+                // Giữ lại phiên bản constructor cũ hơn để tương thích
                 Match match = new Match(
                         apiMatch.getFixture().getId(),
                         league,
@@ -247,7 +246,8 @@ public class MatchRepository {
                         matchTime,
                         apiMatch.getFixture().getStatus().getShortStatus(),
                         score,
-                        apiMatch.getLeague().getRound()
+                        apiMatch.getLeague().getRound(),
+                        apiMatch.getLeague().getSeason()
                 );
                 domainMatches.add(match);
             } catch (Exception e) {

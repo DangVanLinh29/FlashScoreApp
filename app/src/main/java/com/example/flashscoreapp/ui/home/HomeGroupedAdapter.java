@@ -8,12 +8,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.League;
 import com.example.flashscoreapp.data.model.domain.Match;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +23,6 @@ public class HomeGroupedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private static final int TYPE_MATCH = 1;
 
     private List<Object> displayList = new ArrayList<>();
-    // Dùng interface đã được đơn giản hóa
     private MatchAdapter.OnItemClickListener listener;
     private Set<Integer> favoriteMatchIds = new HashSet<>();
 
@@ -62,7 +59,6 @@ public class HomeGroupedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             return new LeagueHeaderViewHolder(view);
         } else {
             View view = inflater.inflate(R.layout.item_match, parent, false);
-            // Vẫn dùng lại ViewHolder chuẩn
             return new MatchAdapter.MatchViewHolder(view);
         }
     }
@@ -72,26 +68,12 @@ public class HomeGroupedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (holder.getItemViewType() == TYPE_LEAGUE_HEADER) {
             ((LeagueHeaderViewHolder) holder).bind((League) displayList.get(position));
         } else {
-            // --- SỬA LẠI TOÀN BỘ LOGIC TRONG KHỐI ELSE ---
+            // Logic đã được kết hợp và sửa lại cho đúng
             MatchAdapter.MatchViewHolder matchViewHolder = (MatchAdapter.MatchViewHolder) holder;
             Match match = (Match) displayList.get(position);
             boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
-
-            // 1. Gọi hàm bind chỉ với 2 tham số
-            matchViewHolder.bind(match, isFavorite);
-
-            // 2. Gán sự kiện click trực tiếp ở đây
-            holder.itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onItemClick(match);
-                }
-            });
-
-            matchViewHolder.imageViewFavorite.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onFavoriteClick(match, isFavorite);
-                }
-            });
+            // Gọi hàm bind với đủ 3 tham số (bao gồm cả listener)
+            matchViewHolder.bind(match, isFavorite, listener);
         }
     }
 

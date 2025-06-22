@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.leagues.LeaguesFragment">
+    tools:context=".ui.leagues.LeaguesFragment"
+    android:background="@color/window_background">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_leagues"

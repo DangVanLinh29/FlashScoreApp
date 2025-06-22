@@ -18,13 +18,15 @@ public class Match implements Serializable {
     private String status;
     @SerializedName("score")
     private Score score;
-
-    // THÊM TRƯỜNG MỚI
     @SerializedName("round")
     private String round;
 
-    // SỬA LẠI CONSTRUCTOR ĐỂ NHẬN 8 THAM SỐ
-    public Match(int matchId, League league, Team homeTeam, Team awayTeam, long matchTime, String status, Score score, String round) {
+    // THÊM TRƯỜNG MỚI ĐỂ LƯU MÙA GIẢI
+    @SerializedName("season")
+    private int season;
+
+    // SỬA LẠI CONSTRUCTOR ĐỂ NHẬN THÊM `season` (9 tham số)
+    public Match(int matchId, League league, Team homeTeam, Team awayTeam, long matchTime, String status, Score score, String round, int season) {
         this.matchId = matchId;
         this.league = league;
         this.homeTeam = homeTeam;
@@ -33,6 +35,7 @@ public class Match implements Serializable {
         this.status = status;
         this.score = score;
         this.round = round;
+        this.season = season; // Gán giá trị
     }
 
     // Getters for all fields
@@ -43,5 +46,8 @@ public class Match implements Serializable {
     public long getMatchTime() { return matchTime; }
     public String getStatus() { return status; }
     public Score getScore() { return score; }
-    public String getRound() { return round; } // THÊM GETTER
+    public String getRound() { return round; }
+
+    // THÊM GETTER MỚI
+    public int getSeason() { return season; }
 }
