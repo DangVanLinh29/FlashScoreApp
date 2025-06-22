@@ -1,14 +1,20 @@
 package com.example.flashscoreapp.data.model.local;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 
-@Entity(tableName = "favorite_teams")
+// Thêm primaryKeys
+@Entity(tableName = "favorite_teams", primaryKeys = {"teamId", "userEmail"})
 public class FavoriteTeam {
-    @PrimaryKey
+    @NonNull
     public int teamId;
 
-    public FavoriteTeam(int teamId) {
+    @NonNull
+    public String userEmail;
+
+    // Sửa lại constructor
+    public FavoriteTeam(int teamId, @NonNull String userEmail) {
         this.teamId = teamId;
+        this.userEmail = userEmail;
     }
 }

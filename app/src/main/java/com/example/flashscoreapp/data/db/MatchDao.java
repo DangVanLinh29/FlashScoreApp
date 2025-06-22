@@ -25,10 +25,10 @@ public interface MatchDao {
 
     // Lấy tất cả các trận đấu yêu thích.
     // Trả về LiveData để UI có thể tự động cập nhật khi có thay đổi.
-    @Query("SELECT match_object FROM favorite_matches ORDER BY matchTime DESC")
-    LiveData<List<Match>> getAllFavoriteMatches();
+    @Query("SELECT match_object FROM favorite_matches WHERE userEmail = :userEmail ORDER BY matchTime DESC")
+    LiveData<List<Match>> getAllFavoriteMatches(String userEmail);
 
     // Kiểm tra xem một trận đấu có trong danh sách yêu thích hay không
-    @Query("SELECT * FROM favorite_matches WHERE matchId = :matchId")
-    FavoriteMatch getFavoriteMatchById(int matchId);
+    @Query("SELECT * FROM favorite_matches WHERE matchId = :matchId AND userEmail = :userEmail")
+    FavoriteMatch getFavoriteMatchById(int matchId, String userEmail);
 }

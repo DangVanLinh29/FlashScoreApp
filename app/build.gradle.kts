@@ -72,4 +72,7 @@ dependencies {
     // Glide
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
+
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
 }

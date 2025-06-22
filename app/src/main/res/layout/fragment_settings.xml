@@ -14,11 +14,28 @@
         <TextView style="@style/SettingsItem" android:drawableStart="@drawable/ic_notifications_24" android:text="Thiết lập thông báo" />
 
         <TextView style="@style/SettingsHeader" android:text="Người dùng" />
-        <RelativeLayout style="@style/SettingsItemContainer">
-            <TextView style="@style/SettingsItem.Title" android:drawableStart="@drawable/ic_person" android:text="Chưa đăng nhập" />
-            <Button style="@style/Widget.AppCompat.Button.Colored" android:layout_width="wrap_content" android:layout_height="40dp" android:layout_alignParentEnd="true" android:text="Đăng nhập" />
+        <RelativeLayout style="@style/SettingsItemContainer" android:id="@+id/user_section">
+            <TextView
+                android:id="@+id/text_login_status" style="@style/SettingsItem.Title"
+                android:drawableStart="@drawable/ic_person"
+                android:text="Chưa đăng nhập" />
+            <Button
+                android:id="@+id/button_login"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:text="Đăng nhập" />
         </RelativeLayout>
-
+        <TextView
+            android:id="@+id/button_logout"
+            style="@style/SettingsItem"
+            android:text="Đăng xuất"
+            android:gravity="center"
+            android:textColor="@android:color/holo_red_dark"
+            android:drawableEnd="@null"
+            android:visibility="gone"
+            tools:visibility="visible"/>
         <TextView style="@style/SettingsHeader" android:text="Giao diện" />
         <RelativeLayout style="@style/SettingsItemContainer">
             <TextView style="@style/SettingsItem.Title" android:drawableStart="@drawable/ic_lightdark" android:text="Chế độ sáng / Chế độ tối" />

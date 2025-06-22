@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:colorBackground"
+    tools:context=".ui.auth.LoginActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_login"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationIcon="?attr/homeAsUpIndicator" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Trở thành fan số 1 của chúng tôi"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đăng ký miễn phí chỉ tốn vài giây"
+        android:textSize="16sp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="48dp"/>
+
+    <Button
+        android:id="@+id/button_continue_email"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tiếp tục với Email"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="16dp"
+        app:icon="@drawable/ic_email"
+        android:gravity="center"
+        android:textColor="?android:textColorPrimary"/>
+
+    <Button
+        android:id="@+id/button_continue_facebook"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tiếp tục với Facebook"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="16dp"
+        app:icon="@android:drawable/ic_menu_myplaces"
+        android:gravity="center"
+        app:iconTint="#1877F2"
+        android:textColor="?android:textColorPrimary"/>
+
+    <Button
+        android:id="@+id/button_continue_google"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tiếp tục với Google"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="16dp"
+        app:icon="@android:drawable/ic_menu_myplaces"
+        android:gravity="center"
+        app:iconTint="#DB4437"
+        android:textColor="?android:textColorPrimary"/>
+
+    <Button
+        android:id="@+id/button_continue_apple"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tiếp tục với Apple"
+        android:backgroundTint="@android:color/black"
+        android:textColor="@android:color/white"
+        android:layout_marginHorizontal="24dp"
+        app:icon="@android:drawable/ic_menu_myplaces"
+        android:gravity="center"
+        app:iconTint="@android:color/white"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Qua việc nhập vào bất kỳ nút “tiếp tục” nào, bạn đã đồng ý với điều khoản sử dụng và xác nhận chính sách bảo mật của chúng tôi trong ứng dụng."
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:textSize="12sp"/>
+</LinearLayout>

@@ -17,6 +17,6 @@ public interface TeamDao {
     @Delete
     void removeFavorite(FavoriteTeam team);
 
-    @Query("SELECT * FROM favorite_teams")
-    LiveData<List<FavoriteTeam>> getAllFavoriteTeams();
+    @Query("SELECT * FROM favorite_teams WHERE userEmail = :userEmail")
+    LiveData<List<FavoriteTeam>> getAllFavoriteTeams(String userEmail);
 }

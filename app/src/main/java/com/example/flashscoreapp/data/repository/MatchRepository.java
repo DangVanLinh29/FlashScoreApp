@@ -22,6 +22,7 @@ import com.example.flashscoreapp.data.model.domain.Team;
 import com.example.flashscoreapp.data.model.local.FavoriteMatch;
 import com.example.flashscoreapp.data.model.local.FavoriteTeam;
 import com.example.flashscoreapp.data.model.remote.*;
+import com.example.flashscoreapp.util.SessionManager; // Đảm bảo đã import
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,42 +45,63 @@ public class MatchRepository {
     private final MatchDao matchDao;
     private final TeamDao teamDao;
     private final ExecutorService executorService;
+    private final SessionManager sessionManager; // <<--- DÒNG NÀY BỊ THIẾU TRONG FILE CỦA BẠN
     private final String API_KEY = "5e88b7e40emsh79a567711143f87p119b30jsnbc4b0f951a57";
     private final String API_HOST = "api-football-v1.p.rapidapi.com";
 
     public MatchRepository(Application application) {
         this.apiService = RetrofitClient.getApiService();
-        AppDatabase database = AppDatabase.getDatabase(application);
+        AppDatabase database     = AppDatabase.getDatabase(application);
         this.matchDao = database.matchDao();
         this.teamDao = database.teamDao();
         this.executorService = Executors.newSingleThreadExecutor();
+        this.sessionManager = new SessionManager(application); // Dòng này sẽ hết báo lỗi
     }
 
+    // ... PHẦN CÒN LẠI CỦA LỚP GIỮ NGUYÊN ...
+
     public LiveData<List<Match>> getAllFavoriteMatches() {
-        return matchDao.getAllFavoriteMatches();
+        String email = sessionManager.getUserEmail();
+        if (email == null) {
+            return new MutableLiveData<>(new ArrayList<>()); // Trả về danh sách rỗng nếu chưa đăng nhập
+        }
+        return matchDao.getAllFavoriteMatches(email);
     }
 
     public void addFavorite(Match match) {
-        FavoriteMatch favoriteMatch = new FavoriteMatch(match.getMatchId(), match.getMatchTime(), match);
+        String email = sessionManager.getUserEmail();
+        if (email == null) return; // Không làm gì nếu chưa đăng nhập
+        FavoriteMatch favoriteMatch = new FavoriteMatch(match.getMatchId(), email, match.getMatchTime(), match);
         executorService.execute(() -> matchDao.addFavorite(favoriteMatch));
     }
 
     public void removeFavorite(Match match) {
-        FavoriteMatch favoriteMatch = new FavoriteMatch(match.getMatchId(), match.getMatchTime(), match);
+        String email = sessionManager.getUserEmail();
+        if (email == null) return;
+        FavoriteMatch favoriteMatch = new FavoriteMatch(match.getMatchId(), email, match.getMatchTime(), match);
         executorService.execute(() -> matchDao.removeFavorite(favoriteMatch));
     }
 
     public LiveData<List<FavoriteTeam>> getAllFavoriteTeams() {
-        return teamDao.getAllFavoriteTeams();
+        String email = sessionManager.getUserEmail();
+        if (email == null) {
+            return new MutableLiveData<>(new ArrayList<>());
+        }
+        return teamDao.getAllFavoriteTeams(email);
     }
 
+
     public void addFavoriteTeam(Team team) {
-        FavoriteTeam favoriteTeam = new FavoriteTeam(team.getId());
+        String email = sessionManager.getUserEmail();
+        if (email == null) return;
+        FavoriteTeam favoriteTeam = new FavoriteTeam(team.getId(), email);
         executorService.execute(() -> teamDao.addFavorite(favoriteTeam));
     }
 
     public void removeFavoriteTeam(Team team) {
-        FavoriteTeam favoriteTeam = new FavoriteTeam(team.getId());
+        String email = sessionManager.getUserEmail();
+        if (email == null) return;
+        FavoriteTeam favoriteTeam = new FavoriteTeam(team.getId(), email);
         executorService.execute(() -> teamDao.removeFavorite(favoriteTeam));
     }
     public LiveData<MatchDetails> getMatchDetailsFromApi(int matchId) {

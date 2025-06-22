@@ -2,51 +2,50 @@ package com.example.flashscoreapp.data.model.local;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
-
 import com.example.flashscoreapp.data.db.Converters;
 import com.example.flashscoreapp.data.model.domain.Match;
+import androidx.annotation.NonNull;
 
-@Entity(tableName = "favorite_matches")
+// Thêm primaryKeys để xác định một mục yêu thích là duy nhất cho mỗi user
+@Entity(tableName = "favorite_matches", primaryKeys = {"matchId", "userEmail"})
 public class FavoriteMatch {
 
-    @PrimaryKey
+    @NonNull // matchId không được null
     private int matchId;
+
+    @NonNull // userEmail không được null
+    private String userEmail;
+
     private long matchTime;
+
     @TypeConverters(Converters.class)
     @ColumnInfo(name = "match_object")
     private Match match;
 
-    // Sửa lại constructor
-    public FavoriteMatch(int matchId, long matchTime, Match match) {
+    // Sửa lại constructor để nhận thêm userEmail
+    public FavoriteMatch(int matchId, @NonNull String userEmail, long matchTime, Match match) {
         this.matchId = matchId;
+        this.userEmail = userEmail;
         this.matchTime = matchTime;
         this.match = match;
     }
 
-    // Getter và Setter
-    public int getMatchId() {
-        return matchId;
+    // Thêm Getter và Setter cho userEmail
+    @NonNull
+    public String getUserEmail() {
+        return userEmail;
     }
 
-    public void setMatchId(int matchId) {
-        this.matchId = matchId;
+    public void setUserEmail(@NonNull String userEmail) {
+        this.userEmail = userEmail;
     }
 
-    public Match getMatch() {
-        return match;
-    }
-
-    public void setMatch(Match match) {
-        this.match = match;
-    }
-
-    public long getMatchTime() {
-        return matchTime;
-    }
-
-    public void setMatchTime(long matchTime) {
-        this.matchTime = matchTime;
-    }
+    // Các getter/setter khác giữ nguyên
+    public int getMatchId() { return matchId; }
+    public void setMatchId(int matchId) { this.matchId = matchId; }
+    public Match getMatch() { return match; }
+    public void setMatch(Match match) { this.match = match; }
+    public long getMatchTime() { return matchTime; }
+    public void setMatchTime(long matchTime) { this.matchTime = matchTime; }
 }

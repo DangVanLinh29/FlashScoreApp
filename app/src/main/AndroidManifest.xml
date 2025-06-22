@@ -36,6 +36,12 @@
         <activity
             android:name=".ui.team_details.TeamDetailsActivity"
             android:parentActivityName=".ui.MainActivity" />
+        <activity
+            android:name=".ui.auth.LoginActivity"
+            android:parentActivityName=".ui.settings.SettingsActivity" />
+        <activity
+            android:name=".ui.auth.AuthEmailActivity"
+            android:parentActivityName=".ui.auth.LoginActivity" />
 
     </application>
 
