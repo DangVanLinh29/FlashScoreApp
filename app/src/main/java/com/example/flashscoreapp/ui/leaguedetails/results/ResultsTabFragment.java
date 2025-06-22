@@ -109,6 +109,14 @@ public class ResultsTabFragment extends Fragment implements MatchAdapter.OnItemC
         }
     }
 
-
-
+    // --- THÊM PHƯƠNG THỨC CÒN THIẾU VÀO ĐÂY ---
+    @Override
+    public void onTeamClick(Team team, Match matchContext) {
+        Intent intent = new Intent(getActivity(), TeamDetailsActivity.class);
+        intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
+        // Lấy leagueId và seasonYear từ context của Fragment
+        intent.putExtra(TeamDetailsActivity.EXTRA_LEAGUE_ID, this.leagueId);
+        intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, this.seasonYear);
+        startActivity(intent);
+    }
 }

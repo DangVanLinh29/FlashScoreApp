@@ -1,47 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="56dp"
-    android:layout_height="wrap_content">
+    android:layout_width="60dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center">
 
     <ImageView
-        android:id="@+id/image_player_placeholder"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
-        android:src="@drawable/ic_person"
-        app:tint="?android:attr/textColorPrimary"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:id="@+id/image_player_photo"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/circle_background"
+        android:scaleType="centerCrop"
+        tools:src="@drawable/ic_person"/>
 
     <TextView
-        android:id="@+id/text_player_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:gravity="center"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textSize="10sp"
-        android:textColor="?android:attr/textColorPrimary"
-        app:layout_constraintTop_toBottomOf="@id/image_player_placeholder"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="Cầu thủ" />
-
-    <TextView
-        android:id="@+id/text_player_number"
+        android:id="@+id/text_player_number_on_pitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:textSize="10sp"
+        android:layout_marginTop="-28dp"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@id/image_player_placeholder"
-        app:layout_constraintBottom_toBottomOf="@id/image_player_placeholder"
-        app:layout_constraintStart_toStartOf="@id/image_player_placeholder"
-        app:layout_constraintEnd_toEndOf="@id/image_player_placeholder"
+        android:gravity="center"
+        android:background="#80000000"
+        android:paddingHorizontal="4dp"
         tools:text="99" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/text_player_name_on_pitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:textSize="10sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textColor="?android:attr/textColorPrimary"
+        tools:text="K. Mbappé" />
+</LinearLayout>

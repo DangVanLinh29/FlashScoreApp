@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-// Thêm "implements" cho interface
 public class H2HFragment extends Fragment implements MatchAdapter.OnItemClickListener {
     private MatchDetailsViewModel viewModel;
     private RecentMatchesAdapter recentMatchesAdapter;
@@ -52,18 +51,12 @@ public class H2HFragment extends Fragment implements MatchAdapter.OnItemClickLis
         // Lắng nghe cặp danh sách trận đấu
         viewModel.getRecentMatchesPair().observe(getViewLifecycleOwner(), pair -> {
             if (pair != null && pair.first != null && pair.second != null) {
-                // Lấy thông tin trận đấu hiện tại để có tên đội
                 Match currentMatch = ((MatchDetailsActivity) requireActivity()).getMatch();
                 if (currentMatch == null) return;
 
-                // Xây dựng danh sách hiển thị
                 List<Object> displayList = new ArrayList<>();
-
-                // Thêm header và 5 trận của đội nhà
                 displayList.add("5 trận gần nhất của " + currentMatch.getHomeTeam().getName());
                 displayList.addAll(pair.first);
-
-                // Thêm header và 5 trận của đội khách
                 displayList.add("5 trận gần nhất của " + currentMatch.getAwayTeam().getName());
                 displayList.addAll(pair.second);
 
@@ -72,7 +65,6 @@ public class H2HFragment extends Fragment implements MatchAdapter.OnItemClickLis
         });
     }
 
-    // --- Triển khai các phương thức của OnItemClickListener ---
     @Override
     public void onItemClick(Match match) {
         Intent intent = new Intent(getActivity(), MatchDetailsActivity.class);
@@ -82,7 +74,20 @@ public class H2HFragment extends Fragment implements MatchAdapter.OnItemClickLis
 
     @Override
     public void onFavoriteClick(Match match, boolean isFavorite) {
-
+        // Tab H2H không cần xử lý yêu thích, có thể để trống
     }
 
+    // --- THÊM PHƯƠNG THỨC CÒN THIẾU VÀO ĐÂY ---
+    @Override
+    public void onTeamClick(Team team, Match matchContext) {
+        Intent intent = new Intent(getActivity(), TeamDetailsActivity.class);
+        intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
+        if (matchContext != null && matchContext.getLeague() != null) {
+            intent.putExtra(TeamDetailsActivity.EXTRA_LEAGUE_ID, matchContext.getLeague().getId());
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(matchContext.getMatchTime());
+            intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, cal.get(Calendar.YEAR));
+        }
+        startActivity(intent);
+    }
 }

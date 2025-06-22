@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.flashscoreapp.R;
 import com.example.flashscoreapp.data.model.domain.Match;
+import com.example.flashscoreapp.data.model.domain.Team;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,10 +27,11 @@ import java.util.Set;
 
 public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHolder> {
 
-    // --- SỬA LẠI INTERFACE, CHỈ CÒN 2 PHƯƠNG THỨC ---
+    // Interface hoàn chỉnh với 3 phương thức
     public interface OnItemClickListener {
         void onItemClick(Match match);
         void onFavoriteClick(Match match, boolean isFavorite);
+        void onTeamClick(Team team, Match matchContext);
     }
 
     private List<Match> matches = new ArrayList<>();
@@ -50,22 +53,8 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
     public void onBindViewHolder(@NonNull MatchViewHolder holder, int position) {
         Match match = matches.get(position);
         boolean isFavorite = favoriteMatchIds.contains(match.getMatchId());
-        // Hàm bind giờ sẽ không cần truyền listener vào nữa
-        holder.bind(match, isFavorite);
-
-        // --- GÁN SỰ KIỆN CLICK Ở ĐÂY ---
-        // Gán cho cả hàng
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(match);
-            }
-        });
-        // Gán cho nút yêu thích
-        holder.imageViewFavorite.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onFavoriteClick(match, isFavorite);
-            }
-        });
+        // Truyền listener vào hàm bind
+        holder.bind(match, isFavorite, listener);
     }
 
     @Override
@@ -87,9 +76,7 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
 
     public static class MatchViewHolder extends RecyclerView.ViewHolder {
         private final TextView textLeft, textRight, textHomeName, textAwayName;
-        private final ImageView imageHomeLogo, imageAwayLogo;
-        // Để public final để onBindViewHolder có thể truy cập
-        public final ImageView imageViewFavorite;
+        private final ImageView imageHomeLogo, imageAwayLogo, imageViewFavorite;
 
         public MatchViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,8 +89,8 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
             imageViewFavorite = itemView.findViewById(R.id.image_view_favorite);
         }
 
-        public void bind(final Match match, final boolean isFavorite) {
-            // Phần bind dữ liệu giao diện vẫn giữ nguyên
+        public void bind(final Match match, final boolean isFavorite, final OnItemClickListener listener) {
+            // 1. Gán dữ liệu vào các view
             textHomeName.setText(match.getHomeTeam().getName());
             textAwayName.setText(match.getAwayTeam().getName());
             Glide.with(itemView.getContext()).load(match.getHomeTeam().getLogoUrl()).placeholder(R.drawable.ic_leagues_24).into(imageHomeLogo);
@@ -115,6 +102,7 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
             textLeft.setTextColor(secondaryColor);
             textRight.setTextColor(primaryColor);
             textRight.setTextSize(16f);
+
             if ("NS".equalsIgnoreCase(status)) {
                 Date matchDate = new Date(match.getMatchTime());
                 textLeft.setText(new SimpleDateFormat("dd.MM.", Locale.getDefault()).format(matchDate));
@@ -130,11 +118,32 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
                 textRight.setText(match.getScore().getHome() + " - " + match.getScore().getAway());
             }
 
+            // 2. Gán tất cả sự kiện click
+            // Click vào cả hàng
+            itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onItemClick(match);
+            });
+
+            // Click vào logo đội nhà
+            imageHomeLogo.setOnClickListener(v -> {
+                if (listener != null) listener.onTeamClick(match.getHomeTeam(), match);
+            });
+
+            // Click vào logo đội khách
+            imageAwayLogo.setOnClickListener(v -> {
+                if (listener != null) listener.onTeamClick(match.getAwayTeam(), match);
+            });
+
+            // Click vào nút yêu thích
             if (isStatusFinished(status)) {
                 imageViewFavorite.setVisibility(View.GONE);
+                imageViewFavorite.setOnClickListener(null);
             } else {
                 imageViewFavorite.setVisibility(View.VISIBLE);
                 imageViewFavorite.setImageResource(isFavorite ? R.drawable.ic_star_filled : R.drawable.ic_star_empty);
+                imageViewFavorite.setOnClickListener(v -> {
+                    if (listener != null) listener.onFavoriteClick(match, isFavorite);
+                });
             }
         }
 

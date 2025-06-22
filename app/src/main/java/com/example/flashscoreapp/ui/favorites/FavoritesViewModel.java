@@ -55,13 +55,11 @@ public class FavoritesViewModel extends AndroidViewModel {
                 .map(ft -> ft.teamId)
                 .collect(Collectors.toSet());
 
-        // Các trạng thái trận đấu đã kết thúc hoặc bị hủy
         List<String> finishedStatus = Arrays.asList("FT", "AET", "PEN", "CANC", "ABD", "AWD", "WO");
 
         List<Match> filteredMatches = allMatches.stream()
                 .filter(match -> favoriteTeamIds.contains(match.getHomeTeam().getId()) ||
                         favoriteTeamIds.contains(match.getAwayTeam().getId()))
-                // Lọc thêm: chỉ lấy các trận chưa kết thúc
                 .filter(match -> !finishedStatus.contains(match.getStatus()))
                 .collect(Collectors.toList());
 
@@ -74,6 +72,11 @@ public class FavoritesViewModel extends AndroidViewModel {
 
     public LiveData<List<Match>> getFavoriteTeamMatches() {
         return favoriteTeamMatches;
+    }
+
+
+    public void addFavorite(Match match) {
+        repository.addFavorite(match);
     }
 
     public void removeFavorite(Match match) {

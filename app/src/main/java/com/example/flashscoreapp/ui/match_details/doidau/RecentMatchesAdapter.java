@@ -59,20 +59,9 @@ public class RecentMatchesAdapter extends RecyclerView.Adapter<RecyclerView.View
             MatchAdapter.MatchViewHolder matchViewHolder = (MatchAdapter.MatchViewHolder) holder;
             Match match = (Match) items.get(position);
 
-            // --- SỬA LẠI TẠI ĐÂY ---
-            // 1. Gọi hàm bind chỉ với 2 tham số
-            // Trong tab H2H, chúng ta không cần hiển thị sao yêu thích nên isFavorite là false
-            matchViewHolder.bind(match, false);
-
-            // 2. Gán sự kiện click cho cả hàng ở đây
-            holder.itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onItemClick(match);
-                }
-            });
-
-            // Nút yêu thích đã được ẩn đi cho các trận đã kết thúc bên trong ViewHolder
-            // nên không cần gán listener cho nó ở đây nữa.
+            // Gọi hàm bind với đủ 3 tham số, bao gồm cả listener.
+            // isFavorite là false vì đây là danh sách đối đầu, không phải danh sách yêu thích.
+            matchViewHolder.bind(match, false, listener);
         }
     }
 
