@@ -225,8 +225,10 @@ public class MatchRepository {
                         matchTime,
                         apiMatch.getFixture().getStatus().getShortStatus(),
                         score,
-                        apiMatch.getLeague().getRound()
+                        apiMatch.getLeague().getRound(),
+                        apiMatch.getLeague().getSeason()
                 );
+                domainMatches.add(match);
                 domainMatches.add(match);
             } catch (Exception e) {
                 Log.e("MatchRepository", "Error converting ApiMatch to Domain Match", e);

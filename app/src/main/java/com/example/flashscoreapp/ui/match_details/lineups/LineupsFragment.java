@@ -204,19 +204,19 @@ public class LineupsFragment extends Fragment {
 
     private View createPlayerView(PlayerDisplay player) {
         View playerView = LayoutInflater.from(getContext()).inflate(R.layout.item_player_on_pitch, (ViewGroup) getView(), false);
-        ImageView playerPhoto = playerView.findViewById(R.id.image_player_photo);
+        // THAY ĐỔI KIỂU DỮ LIỆU TỪ ImageView -> View
+        View playerPhoto = playerView.findViewById(R.id.image_player_photo);
         TextView number = playerView.findViewById(R.id.text_player_number_on_pitch);
         TextView name = playerView.findViewById(R.id.text_player_name_on_pitch);
 
         if (player != null) {
-            number.setText(String.valueOf(player.getNumber()));
+
+            if (player.getNumber() != null) {
+                number.setText(String.valueOf(player.getNumber()));
+            } else {
+                number.setText("-");
+            }
             name.setText(player.getName());
-            Glide.with(this)
-                    .load(player.getPhotoUrl())
-                    .placeholder(R.drawable.ic_person)
-                    .error(R.drawable.ic_person)
-                    .circleCrop()
-                    .into(playerPhoto);
         }
         return playerView;
     }
