@@ -75,4 +75,10 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
+    // Firebase Bill of Materials (BOM) - Quản lý phiên bản các thư viện Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+
+    // Thư viện Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging")
+
 }
