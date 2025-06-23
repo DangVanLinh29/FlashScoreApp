@@ -80,8 +80,14 @@ public class LoginActivity extends AppCompatActivity {
 
         Button continueGoogle = findViewById(R.id.button_continue_google);
         continueGoogle.setOnClickListener(v -> {
-            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-            googleSignInLauncher.launch(signInIntent);
+            // Đăng xuất khỏi client trước để buộc hiển thị hộp thoại chọn tài khoản
+            mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+                // Sau khi quá trình đăng xuất hoàn tất, bắt đầu tiến trình đăng nhập mới
+                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+
+                // Sử dụng launcher mới của bạn để bắt đầu
+                googleSignInLauncher.launch(signInIntent);
+            });
         });
 
         findViewById(R.id.button_continue_facebook).setOnClickListener(v -> showComingSoon());

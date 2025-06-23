@@ -5,7 +5,7 @@
     <color name="colorPrimary">#5E35B1</color> <color name="colorPrimaryVariant">#4527A0</color>
     <color name="colorAccent">#5E35B1</color>
     <color name="selected_date_color">#ca0139</color>
-    <color name="backgroudTop">#031320</color>
+    <color name="backgroudTop">#072640</color>
     <color name="progress_bar_background">#F0F0F0</color>
     <color name="progress_bar_progress">#212121</color>
     <color name="season_date_text">#616161</color>

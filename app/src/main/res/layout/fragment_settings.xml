@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,12 +20,13 @@
                 android:id="@+id/text_login_status" style="@style/SettingsItem.Title"
                 android:drawableStart="@drawable/ic_person"
                 android:text="Chưa đăng nhập" />
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_login"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:layout_alignParentEnd="true"
+                app:backgroundTint="@color/backgroudTop"
                 android:text="Đăng nhập" />
         </RelativeLayout>
         <TextView
