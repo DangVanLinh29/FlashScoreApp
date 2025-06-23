@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:paddingVertical="8dp"
     android:paddingHorizontal="16dp"
-    android:background="@color/window_background">
+    android:background="@color/surface_background">
 
     <TextView
         android:id="@+id/text_player_rank"

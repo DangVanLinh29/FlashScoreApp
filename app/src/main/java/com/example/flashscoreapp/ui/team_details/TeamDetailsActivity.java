@@ -1,6 +1,7 @@
 package com.example.flashscoreapp.ui.team_details;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -93,17 +94,27 @@ public class TeamDetailsActivity extends AppCompatActivity {
     }
 
     private void observeViewModel() {
+        // Ánh xạ các view cần thay đổi
         TextView stadiumName = findViewById(R.id.text_stadium_name);
         TextView stadiumCapacity = findViewById(R.id.text_stadium_capacity);
+        // Lấy cả container để ẩn/hiện
+        View stadiumInfoContainer = findViewById(R.id.stadium_info_container);
 
         viewModel.getTeamDetails().observe(this, teamDetailsResponse -> {
-            if (teamDetailsResponse != null && teamDetailsResponse.getVenue() != null) {
+            // Kiểm tra xem API có trả về dữ liệu sân vận động không
+            if (teamDetailsResponse != null && teamDetailsResponse.getVenue() != null && teamDetailsResponse.getVenue().getName() != null) {
+                // Nếu có, hiện container lên và gán dữ liệu
+                stadiumInfoContainer.setVisibility(View.VISIBLE);
+
                 ApiVenue venue = teamDetailsResponse.getVenue();
                 String stadiumInfo = venue.getName() + " (" + venue.getCity() + ")";
                 stadiumName.setText(stadiumInfo);
 
                 String capacityInfo = "Sức chứa: " + venue.getCapacity();
                 stadiumCapacity.setText(capacityInfo);
+            } else {
+                // Nếu không có dữ liệu, ẩn cả khối container đi
+                stadiumInfoContainer.setVisibility(View.GONE);
             }
         });
     }

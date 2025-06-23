@@ -29,7 +29,7 @@ public class TopScorersFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Tái sử dụng layout chỉ chứa RecyclerView
-        return inflater.inflate(R.layout.fragment_recycler_view_only, container, false);
+        return inflater.inflate(R.layout.fragment_top_scorers, container, false);
     }
 
     @Override

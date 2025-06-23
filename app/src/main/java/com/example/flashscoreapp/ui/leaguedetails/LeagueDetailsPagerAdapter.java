@@ -11,29 +11,28 @@ import com.example.flashscoreapp.ui.leaguedetails.standings.StandingsContainerFr
 public class LeagueDetailsPagerAdapter extends FragmentStateAdapter {
     private final int leagueId;
     private final Season season;
+    private final boolean isSeasonFinished; // Thêm biến này
 
-    public LeagueDetailsPagerAdapter(@NonNull Fragment fragment, int leagueId, Season season) {
+    // Sửa constructor để nhận thêm biến isSeasonFinished
+    public LeagueDetailsPagerAdapter(@NonNull Fragment fragment, int leagueId, Season season, boolean isSeasonFinished) {
         super(fragment);
         this.leagueId = leagueId;
         this.season = season;
+        this.isSeasonFinished = isSeasonFinished;
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        // Lấy ra năm của mùa giải một cách an toàn
         int seasonYear = (season != null) ? season.getYear() : 0;
 
         switch (position) {
             case 0:
-                // Tab Bảng xếp hạng
                 return StandingsContainerFragment.newInstance(leagueId, seasonYear);
             case 1:
-                // Tab Kết quả
                 return ResultsTabFragment.newInstance(leagueId, seasonYear);
             case 2:
-                // SỬA TẠI ĐÂY:
-                // Tab Lịch thi đấu cũng cần leagueId và seasonYear
+                // Case này sẽ không bao giờ được gọi nếu mùa giải đã kết thúc
                 return FixturesTabFragment.newInstance(leagueId, seasonYear);
             default:
                 return new Fragment();
@@ -42,7 +41,7 @@ public class LeagueDetailsPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        // SỬA Ở ĐÂY: Chúng ta chỉ có 3 tab chính
-        return 3;
+        // Nếu mùa giải đã kết thúc, chỉ hiển thị 2 tab. Nếu chưa, hiển thị 3 tab.
+        return isSeasonFinished ? 2 : 3;
     }
 }

@@ -80,7 +80,6 @@ public class OverallStandingsFragment extends Fragment implements StandingsAdapt
                 List<Object> displayList = new ArrayList<>();
                 for (List<StandingItem> group : allGroups) {
                     if (group != null && !group.isEmpty()) {
-                        displayList.add(group.get(0).getGroup());
                         displayList.addAll(group);
                     }
                 }
