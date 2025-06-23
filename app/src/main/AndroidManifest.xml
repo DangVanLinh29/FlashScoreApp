@@ -45,7 +45,9 @@
         <activity
             android:name=".ui.auth.AuthEmailActivity"
             android:parentActivityName=".ui.auth.LoginActivity" />
-
+        <activity
+            android:name=".ui.settings.NotificationSettingsActivity"
+            android:parentActivityName=".ui.settings.SettingsActivity" />
 
     </application>
 

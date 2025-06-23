@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="22dp"
-        android:background="@color/surface_background">
+        android:background="@color/window_background">
 
         <View
             android:id="@+id/start_cap"
@@ -76,7 +76,7 @@
                 android:layout_height="16dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_leagues_24"
-                app:tint="@android:color/white" />
+                 />
         </FrameLayout>
 
         <ProgressBar

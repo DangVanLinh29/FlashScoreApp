@@ -86,8 +86,8 @@ public class MatchDetailsActivity extends AppCompatActivity {
         favoriteIconHome = findViewById(R.id.image_favorite_home);
         favoriteIconAway = findViewById(R.id.image_favorite_away);
 
-        homeName.setText(match.getHomeTeam().getName().replaceFirst(" ", "\n"));
-        awayName.setText(match.getAwayTeam().getName().replaceFirst(" ", "\n"));
+        homeName.setText(match.getHomeTeam().getName());
+        awayName.setText(match.getAwayTeam().getName());
         score.setText(match.getScore().getHome() + " - " + match.getScore().getAway());
         status.setText(match.getStatus());
 

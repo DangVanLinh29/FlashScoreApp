@@ -46,7 +46,7 @@ public class MatchRepository {
     private final TeamDao teamDao;
     private final ExecutorService executorService;
     private final SessionManager sessionManager;
-    private final String API_KEY = "5e88b7e40emsh79a567711143f87p119b30jsnbc4b0f951a57";
+    private final String API_KEY = "9603cad7a8mshaf2d58ef107a002p1f7706jsn62cf5be4f1d5";
     private final String API_HOST = "api-football-v1.p.rapidapi.com";
 
     public MatchRepository(Application application) {
