@@ -58,7 +58,7 @@ public class TeamDetailsActivity extends AppCompatActivity {
 
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar_team_details);
-        toolbar.setTitle(team.getName());
+        toolbar.setTitle("Thông tin đội bóng");
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

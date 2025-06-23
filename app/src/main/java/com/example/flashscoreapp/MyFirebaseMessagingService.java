@@ -16,7 +16,14 @@ import com.google.firebase.messaging.RemoteMessage;
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
-    private static final String CHANNEL_ID = "flashscore_channel";
+    private static final String CHANNEL_ID = "flashscore_channel"; //
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // Tạo kênh thông báo ngay khi dịch vụ được tạo
+        createNotificationChannel();
+    }
 
     /**
      * Được gọi khi có một tin nhắn mới được nhận.
@@ -54,27 +61,29 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     /**
      * Tạo và hiển thị một thông báo đơn giản.
      */
-    private void sendNotification(String messageTitle, String messageBody) {
-        createNotificationChannel();
+    // Sửa đổi phương thức này để public để có thể gọi từ MatchReminderReceiver
+    public void sendNotification(String messageTitle, String messageBody) {
+        // Không cần gọi createNotificationChannel() ở đây nữa vì nó đã có trong onCreate
+        // createNotificationChannel(); // // XÓA HOẶC BÌNH LUẬN DÒNG NÀY
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_football_goal)
-                .setContentTitle(messageTitle)
-                .setContentText(messageBody)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true);
+                .setSmallIcon(R.drawable.ic_football_goal) //
+                .setContentTitle(messageTitle) //
+                .setContentText(messageBody) //
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT) //
+                .setAutoCancel(true); //
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this); //
 
         // --- BẮT ĐẦU PHẦN SỬA LỖI ---
         // 1. Kiểm tra xem quyền đã được cấp hay chưa
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) { //
             // Nếu chưa được cấp quyền, không làm gì cả và thoát khỏi hàm
-            Log.d(TAG, "Quyền POST_NOTIFICATIONS chưa được cấp.");
+            Log.d(TAG, "Quyền POST_NOTIFICATIONS chưa được cấp."); //
             return;
         }
         // 2. Nếu đã có quyền, thì mới hiển thị thông báo
-        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build()); //
         // --- KẾT THÚC PHẦN SỬA LỖI ---
     }
 
@@ -82,15 +91,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * Tạo Notification Channel, bắt buộc cho Android 8.0 (API 26) trở lên.
      */
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "FlashScore Notifications";
-            String description = "Channel for FlashScore match events";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { //
+            CharSequence name = "FlashScore Notifications"; //
+            String description = "Channel for FlashScore match events"; //
+            int importance = NotificationManager.IMPORTANCE_DEFAULT; //
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance); //
+            channel.setDescription(description); //
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class); //
+            notificationManager.createNotificationChannel(channel); //
         }
     }
 }

@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:paddingTop="25dp"
-            android:background="@color/window_background_top"
+            android:background="@color/backgroudTop"
             app:titleTextColor="?attr/colorOnPrimary" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -129,7 +129,8 @@
                 app:tabIndicatorColor="@color/selected_date_color"
                 app:tabSelectedTextColor="@color/selected_date_color"
                 app:tabTextColor="?android:attr/textColorSecondary"
-                android:background="@color/surface_background" />
+                android:background="@color/surface_background"
+                android:contentDescription="Các tab chi tiết trận đấu"/>
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/view_pager_match_details"

@@ -9,15 +9,13 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
+        android:layout_height="120dp">
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_team_details"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:titleTextColor="?android:attr/textColorPrimary"
-            android:background="@color/window_background_top"/>
-
+        android:id="@+id/toolbar_team_details"
+        android:layout_width="match_parent"
+        android:layout_height="120dp" app:titleTextColor="@color/white"
+        android:background="@color/backgroudTop"
+        android:paddingTop="40dp" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
