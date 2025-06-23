@@ -38,7 +38,6 @@ public class LeagueDetailsFragment extends Fragment {
     private List<Season> allSeasons;
     private Season selectedSeasonObject;
 
-    // Phương thức newInstance này đã đúng, không cần sửa
     public static LeagueDetailsFragment newInstance(int leagueId, String leagueName, String leagueLogoUrl, List<Season> seasons) {
         LeagueDetailsFragment fragment = new LeagueDetailsFragment();
         Bundle args = new Bundle();
@@ -82,7 +81,6 @@ public class LeagueDetailsFragment extends Fragment {
         TextView leagueNameTextView = view.findViewById(R.id.text_league_name_header);
         Spinner seasonSpinner = view.findViewById(R.id.spinner_season);
         TabLayout tabLayout = view.findViewById(R.id.tab_layout_main);
-        // SỬA: Phải tìm và gán giá trị cho viewPager ở đây
         ViewPager2 viewPager = view.findViewById(R.id.view_pager_main);
 
 
@@ -103,8 +101,8 @@ public class LeagueDetailsFragment extends Fragment {
 
         // Setup ViewPager và TabLayout
         if (selectedSeasonObject != null) {
-
             viewPager.setAdapter(new LeagueDetailsPagerAdapter(this, leagueId, selectedSeasonObject));
+            viewPager.setOffscreenPageLimit(3);
         }
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {

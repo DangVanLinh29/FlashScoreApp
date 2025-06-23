@@ -13,7 +13,7 @@ public class TopScorersViewModel extends AndroidViewModel {
 
     public TopScorersViewModel(@NonNull Application application, int leagueId, int seasonYear) {
         super(application);
-        MatchRepository repository = new MatchRepository(application);
+        MatchRepository repository = MatchRepository.getInstance(application);
         topScorers = repository.getTopScorers(leagueId, seasonYear);
     }
 

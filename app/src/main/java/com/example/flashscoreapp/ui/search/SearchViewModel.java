@@ -20,7 +20,7 @@ public class SearchViewModel extends AndroidViewModel {
 
     public SearchViewModel(@NonNull Application application) {
         super(application);
-        repository = new MatchRepository(application);
+        repository = MatchRepository.getInstance(application);
 
         LiveData<List<Object>> combinedResults = Transformations.switchMap(queryLiveData, query -> {
             MediatorLiveData<List<Object>> mediator = new MediatorLiveData<>();

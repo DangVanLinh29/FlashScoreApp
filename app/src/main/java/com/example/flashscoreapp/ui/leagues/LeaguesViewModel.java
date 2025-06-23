@@ -15,7 +15,7 @@ public class LeaguesViewModel extends AndroidViewModel {
 
     public LeaguesViewModel(@NonNull Application application) {
         super(application);
-        repository = new MatchRepository(application);
+        repository = MatchRepository.getInstance(application);
         // THAY ĐỔI LỜI GỌI HÀM Ở ĐÂY
         leaguesData = repository.getLeaguesWithSeasons();
     }

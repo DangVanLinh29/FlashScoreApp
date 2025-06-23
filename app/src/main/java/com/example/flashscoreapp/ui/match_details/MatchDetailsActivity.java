@@ -122,10 +122,11 @@ public class MatchDetailsActivity extends AppCompatActivity {
 
         // Lấy leagueId và seasonYear trực tiếp từ đối tượng Match
         int leagueId = match.getLeague().getId();
-        int seasonYear = match.getSeason(); // <-- KHÔNG CẦN ĐOÁN NỮA!
+        int seasonYear = match.getSeason();
 
         viewPager.setAdapter(new MatchDetailsPagerAdapter(this, leagueId, seasonYear));
 
+        viewPager.setOffscreenPageLimit(5);
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0: tab.setText("TÓM TẮT"); break;

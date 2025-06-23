@@ -16,7 +16,7 @@ public class AuthViewModel extends AndroidViewModel {
     private SessionManager sessionManager;
     public AuthViewModel(@NonNull Application application) {
         super(application);
-        userRepository = new UserRepository(application);
+        userRepository = UserRepository.getInstance(application);
         sessionManager = new SessionManager(application);
     }
 

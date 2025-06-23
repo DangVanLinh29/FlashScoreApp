@@ -4,31 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp"
+    android:padding="10dp"
     android:gravity="center_vertical"
-    android:background="@color/surface_background">
+    android:background="@color/window_background">
 
     <FrameLayout
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:background="@drawable/logo_background_circle">
-
         <ImageView
-            android:id="@+id/image_league_logo"
+            android:id="@+id/image_team_logo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="2dp"
-            tools:src="@drawable/ic_leagues_24"/>
-
+            tools:src="@tools:sample/avatars" />
     </FrameLayout>
 
     <TextView
-        android:id="@+id/text_league_name"
+        android:id="@+id/text_team_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:textSize="16sp"
+        android:textSize="18sp"
         android:textStyle="bold"
-        tools:text="Premier League"/>
+        android:textColor="?android:attr/textColorPrimary"
+        android:layout_marginStart="16dp"
+        tools:text="Manchester United"/>
 
 </LinearLayout>

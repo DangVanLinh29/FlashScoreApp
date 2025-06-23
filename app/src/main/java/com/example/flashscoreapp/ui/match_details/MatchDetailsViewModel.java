@@ -25,7 +25,7 @@ public class MatchDetailsViewModel extends AndroidViewModel {
     // Constructor nhận 4 tham số
     public MatchDetailsViewModel(@NonNull Application application, int matchId, int homeTeamId, int awayTeamId) {
         super(application);
-        repository = new MatchRepository(application);
+        repository = MatchRepository.getInstance(application);
 
         // Lấy dữ liệu cho các tab Tóm tắt, Số liệu, Đội hình
         matchDetails = repository.getMatchDetailsFromApi(matchId);

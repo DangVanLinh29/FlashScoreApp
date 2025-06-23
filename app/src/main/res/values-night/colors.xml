@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="progress_bar_background">#0f2b34</color>
+    <color name="progress_bar_background">#011e26</color>
     <color name="progress_bar_progress">#031320</color>
     <color name="backgroudTop">#031320</color>
     <color name="backgroudDate">#000a0c</color>

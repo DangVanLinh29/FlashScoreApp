@@ -15,7 +15,7 @@ public class FixturesViewModel extends AndroidViewModel {
 
     public FixturesViewModel(@NonNull Application application, int leagueId, int season) {
         super(application);
-        repository = new MatchRepository(application);
+        repository = MatchRepository.getInstance(application);
         // Lời gọi hàm không đổi, nhưng kiểu trả về của nó đã thay đổi
         fixtures = repository.getFixturesForLeague(leagueId, season);
     }

@@ -14,7 +14,7 @@ public class StandingsViewModel extends AndroidViewModel {
 
     public StandingsViewModel(@NonNull Application application, int leagueId, int season) {
         super(application);
-        MatchRepository repository = new MatchRepository(application);
+        MatchRepository repository = MatchRepository.getInstance(application);
         standings = repository.getStandings(leagueId, season);
     }
 

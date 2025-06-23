@@ -29,6 +29,7 @@ public class FavoritesFragment extends Fragment {
         FavoritesPagerAdapter adapter = new FavoritesPagerAdapter(this);
         viewPager.setAdapter(adapter);
 
+        viewPager.setOffscreenPageLimit(2);
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) {
                 tab.setText("TRẬN ĐẤU");

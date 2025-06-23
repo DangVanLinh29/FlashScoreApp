@@ -81,6 +81,7 @@ public class TeamDetailsActivity extends AppCompatActivity {
         // Truyền các tham số vào PagerAdapter
         viewPager.setAdapter(new TeamDetailsPagerAdapter(this, team.getId(), leagueId, seasonYear));
 
+        viewPager.setOffscreenPageLimit(4);
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0: tab.setText("KẾT QUẢ"); break;

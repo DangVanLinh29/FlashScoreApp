@@ -49,6 +49,7 @@ public class StandingsContainerFragment extends Fragment {
 
         viewPager.setAdapter(new StandingsContainerPagerAdapter(this, leagueId, seasonYear));
 
+        viewPager.setOffscreenPageLimit(4);
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0: tab.setText("TOÀN THỂ"); break;

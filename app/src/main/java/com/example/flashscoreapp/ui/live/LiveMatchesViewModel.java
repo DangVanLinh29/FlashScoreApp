@@ -14,7 +14,7 @@ public class LiveMatchesViewModel extends AndroidViewModel {
 
     public LiveMatchesViewModel(@NonNull Application application) {
         super(application);
-        repository = new MatchRepository(application);
+        repository = MatchRepository.getInstance(application);
         liveMatches = repository.getLiveMatchesFromApi();
     }
 

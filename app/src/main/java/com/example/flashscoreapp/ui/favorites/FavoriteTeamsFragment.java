@@ -2,6 +2,7 @@ package com.example.flashscoreapp.ui.favorites;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,18 +13,17 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.flashscoreapp.R;
-import com.example.flashscoreapp.data.model.domain.League;
 import com.example.flashscoreapp.data.model.domain.Match;
 import com.example.flashscoreapp.data.model.domain.Team;
-import com.example.flashscoreapp.ui.home.HomeGroupedAdapter;
-import com.example.flashscoreapp.ui.home.HomeViewModel;
+import com.example.flashscoreapp.data.model.local.FavoriteTeam;
 import com.example.flashscoreapp.ui.home.MatchAdapter;
 import com.example.flashscoreapp.ui.match_details.MatchDetailsActivity;
 import com.example.flashscoreapp.ui.team_details.TeamDetailsActivity;
 
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +32,14 @@ import java.util.stream.Collectors;
 
 public class FavoriteTeamsFragment extends Fragment implements MatchAdapter.OnItemClickListener {
 
+    private static final String TAG = "FavoriteTeamsFragment";
     private FavoritesViewModel favoritesViewModel;
-    private HomeViewModel homeViewModel;
-    private HomeGroupedAdapter groupedAdapter;
+    private FavoriteTeamsAdapter teamsAdapter;
     private RecyclerView recyclerView;
     private TextView textNoItems;
+
+    private List<FavoriteTeam> currentFavoriteTeams = new ArrayList<>();
+    private List<Match> currentFavoriteTeamMatches = new ArrayList<>();
 
     @Nullable
     @Override
@@ -49,59 +52,86 @@ public class FavoriteTeamsFragment extends Fragment implements MatchAdapter.OnIt
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.main_recycler_view);
         textNoItems = view.findViewById(R.id.text_empty_message);
-        textNoItems.setText("Chưa có trận đấu nào của đội yêu thích.");
 
-        groupedAdapter = new HomeGroupedAdapter();
+        teamsAdapter = new FavoriteTeamsAdapter();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(groupedAdapter);
-        // Gán listener là chính Fragment này
-        groupedAdapter.setOnItemClickListener(this);
+        recyclerView.setAdapter(teamsAdapter);
+        teamsAdapter.setOnItemClickListener(this);
 
         favoritesViewModel = new ViewModelProvider(this).get(FavoritesViewModel.class);
-        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-
         observeViewModel();
     }
 
     private void observeViewModel() {
-        // Lắng nghe danh sách các trận của đội yêu thích
-        favoritesViewModel.getFavoriteTeamMatches().observe(getViewLifecycleOwner(), matches -> {
-            if (matches != null && !matches.isEmpty()) {
-                recyclerView.setVisibility(View.VISIBLE);
-                textNoItems.setVisibility(View.GONE);
-                List<Object> groupedList = groupMatchesByLeague(matches);
-                groupedAdapter.setDisplayList(groupedList);
-            } else {
-                recyclerView.setVisibility(View.GONE);
-                textNoItems.setVisibility(View.VISIBLE);
-                groupedAdapter.setDisplayList(new ArrayList<>());
-            }
+        favoritesViewModel.getFavoriteTeams().observe(getViewLifecycleOwner(), favoriteTeams -> {
+            Log.d(TAG, "Observer: Danh sách đội yêu thích đã cập nhật với " + (favoriteTeams != null ? favoriteTeams.size() : 0) + " đội.");
+            currentFavoriteTeams = favoriteTeams;
+            buildAndDisplayList();
         });
 
-        // Lắng nghe danh sách các trận được yêu thích để cập nhật trạng thái ngôi sao
-        homeViewModel.getFavoriteMatches().observe(getViewLifecycleOwner(), favoriteMatches -> {
+        favoritesViewModel.getFavoriteTeamMatches().observe(getViewLifecycleOwner(), matches -> {
+            Log.d(TAG, "Observer: Danh sách trận đấu của đội yêu thích đã cập nhật với " + (matches != null ? matches.size() : 0) + " trận.");
+            currentFavoriteTeamMatches = matches;
+            buildAndDisplayList();
+        });
+
+        favoritesViewModel.getFavoriteMatches().observe(getViewLifecycleOwner(), favoriteMatches -> {
             if (favoriteMatches != null) {
                 Set<Integer> favoriteIds = favoriteMatches.stream()
                         .map(Match::getMatchId)
                         .collect(Collectors.toSet());
-                groupedAdapter.setFavoriteMatchIds(favoriteIds);
+                teamsAdapter.setFavoriteMatchIds(favoriteIds);
             }
         });
     }
 
-    private List<Object> groupMatchesByLeague(List<Match> matches) {
-        Map<League, List<Match>> groupedMap = matches.stream()
-                .collect(Collectors.groupingBy(
-                        Match::getLeague,
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
+    private void buildAndDisplayList() {
+        if (currentFavoriteTeams == null || currentFavoriteTeams.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            textNoItems.setVisibility(View.VISIBLE);
+            textNoItems.setText("Thêm đội bóng vào Yêu thích để xem lịch thi đấu của họ tại đây.");
+            teamsAdapter.setDisplayList(new ArrayList<>());
+            Log.d(TAG, "Build bị hủy: Chưa có đội nào được yêu thích.");
+            return;
+        }
+
+        if (currentFavoriteTeamMatches == null || currentFavoriteTeamMatches.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            textNoItems.setVisibility(View.VISIBLE);
+            textNoItems.setText("Các đội bạn yêu thích không có trận đấu nào sắp tới.");
+            teamsAdapter.setDisplayList(new ArrayList<>());
+            Log.d(TAG, "Build bị hủy: Không có trận đấu nào sắp tới cho các đội yêu thích.");
+            return;
+        }
+
+        Map<Team, List<Match>> groupedByTeam = new LinkedHashMap<>();
+        Set<Integer> favoriteTeamIds = currentFavoriteTeams.stream().map(ft -> ft.teamId).collect(Collectors.toSet());
+
+        // Gom các trận đấu vào map theo đội
+        for (Match match : currentFavoriteTeamMatches) {
+            Team homeTeam = match.getHomeTeam();
+            Team awayTeam = match.getAwayTeam();
+
+            if (favoriteTeamIds.contains(homeTeam.getId())) {
+                groupedByTeam.computeIfAbsent(homeTeam, k -> new ArrayList<>()).add(match);
+            }
+            if (favoriteTeamIds.contains(awayTeam.getId())) {
+                groupedByTeam.computeIfAbsent(awayTeam, k -> new ArrayList<>()).add(match);
+            }
+        }
+
         List<Object> displayList = new ArrayList<>();
-        for (Map.Entry<League, List<Match>> entry : groupedMap.entrySet()) {
-            displayList.add(entry.getKey());
+        // Sắp xếp các trận của mỗi đội và tạo danh sách hiển thị
+        for (Map.Entry<Team, List<Match>> entry : groupedByTeam.entrySet()) {
+            displayList.add(entry.getKey()); // Thêm header đội bóng
+            entry.getValue().sort(Comparator.comparingLong(Match::getMatchTime)); // Sắp xếp trận đấu theo thời gian
             displayList.addAll(entry.getValue());
         }
-        return displayList;
+
+        Log.d(TAG, "Build thành công. Hiển thị " + displayList.size() + " mục (bao gồm " + groupedByTeam.size() + " đội).");
+        recyclerView.setVisibility(View.VISIBLE);
+        textNoItems.setVisibility(View.GONE);
+        teamsAdapter.setDisplayList(displayList);
     }
 
     @Override
@@ -114,13 +144,12 @@ public class FavoriteTeamsFragment extends Fragment implements MatchAdapter.OnIt
     @Override
     public void onFavoriteClick(Match match, boolean isFavorite) {
         if (isFavorite) {
-            homeViewModel.removeFavorite(match);
+            favoritesViewModel.removeFavorite(match);
         } else {
-            homeViewModel.addFavorite(match);
+            favoritesViewModel.addFavorite(match);
         }
     }
 
-    // --- THÊM PHƯƠNG THỨC CÒN THIẾU VÀO ĐÂY ---
     @Override
     public void onTeamClick(Team team, Match matchContext) {
         Intent intent = new Intent(getActivity(), TeamDetailsActivity.class);

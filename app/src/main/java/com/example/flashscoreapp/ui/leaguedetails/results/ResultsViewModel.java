@@ -23,7 +23,7 @@ public class ResultsViewModel extends AndroidViewModel {
 
     public ResultsViewModel(@NonNull Application application, int leagueId, int seasonYear) {
         super(application);
-        MatchRepository repository = new MatchRepository(application);
+        MatchRepository repository = MatchRepository.getInstance(application);
 
         // Lấy danh sách các trận đã kết thúc
         LiveData<List<Match>> resultsSource = repository.getResultsForLeague(leagueId, seasonYear);

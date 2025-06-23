@@ -27,7 +27,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     public HomeViewModel(@NonNull Application application) {
         super(application);
-        this.matchRepository = new MatchRepository(application);
+        matchRepository = MatchRepository.getInstance(application);
         this.favoriteMatches = matchRepository.getAllFavoriteMatches();
         this.favoriteTeams = matchRepository.getAllFavoriteTeams();
     }

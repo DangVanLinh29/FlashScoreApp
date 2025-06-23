@@ -14,11 +14,18 @@
         android:gravity="center_vertical"
         android:background="@color/window_background">
 
-        <ImageView
-            android:id="@+id/image_league_logo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            tools:src="@drawable/ic_leagues_24"/>
+        <FrameLayout
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/logo_background_circle">
+
+            <ImageView
+                android:id="@+id/image_league_logo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                tools:src="@drawable/ic_leagues_24"/>
+        </FrameLayout>
+
 
         <LinearLayout
             android:layout_width="0dp"

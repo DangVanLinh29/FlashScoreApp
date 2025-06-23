@@ -22,7 +22,7 @@ public class TeamDetailsViewModel extends AndroidViewModel {
     // Sửa constructor để nhận seasonYear
     public TeamDetailsViewModel(@NonNull Application application, int teamId, int seasonYear) {
         super(application);
-        MatchRepository repository = new MatchRepository(application);
+        MatchRepository repository = MatchRepository.getInstance(application);
 
 
         // Lấy thông tin chi tiết của đội

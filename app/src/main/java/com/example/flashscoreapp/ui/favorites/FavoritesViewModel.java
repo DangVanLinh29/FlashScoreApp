@@ -1,85 +1,102 @@
 package com.example.flashscoreapp.ui.favorites;
 
 import android.app.Application;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+
 import com.example.flashscoreapp.data.model.domain.Match;
 import com.example.flashscoreapp.data.model.local.FavoriteTeam;
 import com.example.flashscoreapp.data.repository.MatchRepository;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FavoritesViewModel extends AndroidViewModel {
 
+    private static final String TAG = "FavoritesViewModel";
     private final MatchRepository repository;
     private final MediatorLiveData<List<Match>> favoriteTeamMatches = new MediatorLiveData<>();
     private final LiveData<List<Match>> favoriteMatches;
+    private final LiveData<List<FavoriteTeam>> favoriteTeams;
+
+    // Danh sách để theo dõi các nguồn LiveData đã thêm, giúp chúng ta gỡ bỏ chúng khi cần
+    private final List<LiveData<List<Match>>> activeSources = new ArrayList<>();
 
     public FavoritesViewModel(@NonNull Application application) {
         super(application);
-        repository = new MatchRepository(application);
+        // Sử dụng Singleton (nếu bạn đã áp dụng)
+        repository = MatchRepository.getInstance(application);
 
+        // Lấy danh sách các trận đã bấm yêu thích (cho tab 1)
         favoriteMatches = repository.getAllFavoriteMatches();
+        // Lấy danh sách các đội đã bấm yêu thích
+        this.favoriteTeams = repository.getAllFavoriteTeams();
 
-        SimpleDateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        // --- LOGIC LẤY TRẬN ĐẤU MỚI ---
+        // Lắng nghe sự thay đổi của danh sách đội yêu thích
+        favoriteTeamMatches.addSource(this.favoriteTeams, teams -> {
+            // 1. Xóa tất cả các nguồn lắng nghe cũ để tránh rò rỉ hoặc dữ liệu thừa
+            for (LiveData<List<Match>> source : activeSources) {
+                favoriteTeamMatches.removeSource(source);
+            }
+            activeSources.clear();
 
-        Calendar calendar = Calendar.getInstance();
-        String fromDate = apiDateFormat.format(calendar.getTime());
-        calendar.add(Calendar.DAY_OF_YEAR, 90);
-        String toDate = apiDateFormat.format(calendar.getTime());
+            // Nếu không có đội yêu thích, trả về danh sách rỗng
+            if (teams == null || teams.isEmpty()) {
+                Log.d(TAG, "Không có đội yêu thích nào, trả về danh sách rỗng.");
+                favoriteTeamMatches.setValue(new ArrayList<>());
+                return;
+            }
 
-        final LiveData<List<Match>> upcomingMatches = repository.getMatchesByDateRange(fromDate, toDate);
-        final LiveData<List<FavoriteTeam>> favoriteTeams = repository.getAllFavoriteTeams();
+            Log.d(TAG, "Tìm thấy " + teams.size() + " đội yêu thích. Bắt đầu lấy lịch thi đấu cho từng đội.");
+            // 2. Với mỗi đội yêu thích, gọi API để lấy lịch thi đấu của họ
+            for (FavoriteTeam team : teams) {
+                // Lấy 10 trận đấu sắp tới của mỗi đội
+                LiveData<List<Match>> teamFixturesSource = repository.getNextFixturesForTeam(team.teamId, 10);
+                activeSources.add(teamFixturesSource);
 
-        favoriteTeamMatches.addSource(upcomingMatches, matches ->
-                filterMatches(matches, favoriteTeams.getValue()));
-        favoriteTeamMatches.addSource(favoriteTeams, teams ->
-                filterMatches(upcomingMatches.getValue(), teams));
+                favoriteTeamMatches.addSource(teamFixturesSource, matchesFromTeam -> {
+                    // 3. Mỗi khi có kết quả trả về từ bất kỳ đội nào, gộp tất cả các kết quả lại
+                    recombineAllMatches();
+                });
+            }
+        });
     }
 
-    private void filterMatches(List<Match> allMatches, List<FavoriteTeam> favoriteTeams) {
-        if (allMatches == null || favoriteTeams == null) {
-            favoriteTeamMatches.setValue(new ArrayList<>());
-            return;
+    // Hàm này sẽ gộp kết quả từ tất cả các nguồn và cập nhật LiveData cuối cùng
+    private void recombineAllMatches() {
+        List<Match> combinedList = new ArrayList<>();
+        Set<Integer> matchIds = new HashSet<>(); // Dùng Set để tránh trùng lặp trận đấu
+
+        for (LiveData<List<Match>> source : activeSources) {
+            if (source.getValue() != null) {
+                for (Match match : source.getValue()) {
+                    // Nếu thêm thành công (trận đấu chưa có trong Set) thì mới thêm vào list
+                    if (matchIds.add(match.getMatchId())) {
+                        combinedList.add(match);
+                    }
+                }
+            }
         }
 
-        Set<Integer> favoriteTeamIds = favoriteTeams.stream()
-                .map(ft -> ft.teamId)
-                .collect(Collectors.toSet());
+        // Sắp xếp lại danh sách cuối cùng theo thời gian
+        combinedList.sort(Comparator.comparingLong(Match::getMatchTime));
 
-        List<String> finishedStatus = Arrays.asList("FT", "AET", "PEN", "CANC", "ABD", "AWD", "WO");
-
-        List<Match> filteredMatches = allMatches.stream()
-                .filter(match -> favoriteTeamIds.contains(match.getHomeTeam().getId()) ||
-                        favoriteTeamIds.contains(match.getAwayTeam().getId()))
-                .filter(match -> !finishedStatus.contains(match.getStatus()))
-                .collect(Collectors.toList());
-
-        favoriteTeamMatches.setValue(filteredMatches);
+        Log.d(TAG, "Gộp xong. Tổng cộng có " + combinedList.size() + " trận đấu.");
+        favoriteTeamMatches.setValue(combinedList);
     }
 
-    public LiveData<List<Match>> getFavoriteMatches() {
-        return favoriteMatches;
-    }
-
-    public LiveData<List<Match>> getFavoriteTeamMatches() {
-        return favoriteTeamMatches;
-    }
-
-
-    public void addFavorite(Match match) {
-        repository.addFavorite(match);
-    }
-
-    public void removeFavorite(Match match) {
-        repository.removeFavorite(match);
-    }
+    // Các getters và setters khác giữ nguyên
+    public LiveData<List<Match>> getFavoriteMatches() { return favoriteMatches; }
+    public LiveData<List<Match>> getFavoriteTeamMatches() { return favoriteTeamMatches; }
+    public LiveData<List<FavoriteTeam>> getFavoriteTeams() { return favoriteTeams; }
+    public void addFavorite(Match match) { repository.addFavorite(match); }
+    public void removeFavorite(Match match) { repository.removeFavorite(match); }
 }

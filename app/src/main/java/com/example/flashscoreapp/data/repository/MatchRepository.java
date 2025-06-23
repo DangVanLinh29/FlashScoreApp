@@ -2,7 +2,7 @@ package com.example.flashscoreapp.data.repository;
 
 import android.app.Application;
 import android.util.Log;
-
+import androidx.collection.LruCache;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -41,23 +41,56 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MatchRepository {
+    private static final String TAG = "MatchRepository";
+
+    // --- SINGLETON IMPLEMENTATION ---
+    private static volatile MatchRepository INSTANCE;
+
     private final ApiService apiService;
     private final MatchDao matchDao;
     private final TeamDao teamDao;
     private final ExecutorService executorService;
     private final SessionManager sessionManager;
-    private final String API_KEY = "9603cad7a8mshaf2d58ef107a002p1f7706jsn62cf5be4f1d5";
+    private final String API_KEY = "aeeccdd975mshb49b1a617a0860fp136fbcjsn75d9cabd708e";
     private final String API_HOST = "api-football-v1.p.rapidapi.com";
 
-    public MatchRepository(Application application) {
+    // --- CACHE DECLARATION ---
+    private final LruCache<String, List<Match>> matchesByDateCache;
+    private final LruCache<String, List<List<StandingItem>>> standingsCache;
+    private final LruCache<String, List<ApiTopScorerData>> topScorersCache;
+    private final LruCache<Integer, List<ApiLineup>> lineupsCache;
+    private final LruCache<Integer, MatchDetails> matchDetailsCache;
+
+    // --- SỬA LỖI 1: CONSTRUCTOR PHẢI LÀ PRIVATE ---
+    private MatchRepository(Application application) {
         this.apiService = RetrofitClient.getApiService();
-        AppDatabase database     = AppDatabase.getDatabase(application);
+        AppDatabase database = AppDatabase.getDatabase(application);
         this.matchDao = database.matchDao();
         this.teamDao = database.teamDao();
         this.executorService = Executors.newSingleThreadExecutor();
         this.sessionManager = new SessionManager(application);
+
+        // Khởi tạo caches
+        int smallCacheSize = 5;
+        int mediumCacheSize = 10;
+        this.matchesByDateCache = new LruCache<>(mediumCacheSize);
+        this.standingsCache = new LruCache<>(smallCacheSize);
+        this.topScorersCache = new LruCache<>(smallCacheSize);
+        this.lineupsCache = new LruCache<>(mediumCacheSize);
+        this.matchDetailsCache = new LruCache<>(mediumCacheSize);
     }
 
+    // Phương thức getInstance giữ nguyên
+    public static MatchRepository getInstance(Application application) {
+        if (INSTANCE == null) {
+            synchronized (MatchRepository.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new MatchRepository(application);
+                }
+            }
+        }
+        return INSTANCE;
+    }
     public LiveData<List<Match>> getAllFavoriteMatches() {
         String email = sessionManager.getUserEmail();
         if (email == null) {
@@ -104,8 +137,17 @@ public class MatchRepository {
     }
     public LiveData<MatchDetails> getMatchDetailsFromApi(int matchId) {
         final MutableLiveData<MatchDetails> detailsData = new MutableLiveData<>();
+        MatchDetails cachedDetails = matchDetailsCache.get(matchId);
+        if (cachedDetails != null) {
+            Log.d(TAG, "Tải chi tiết trận " + matchId + " từ CACHE");
+            detailsData.setValue(cachedDetails);
+            return detailsData;
+        }
+        Log.d(TAG, "Tải chi tiết trận " + matchId + " từ API");
+
         final MatchDetails combinedDetails = new MatchDetails(matchId, new ArrayList<>(), new ArrayList<>());
 
+        // Call 1: Get Fixtures
         apiService.getFixtures(matchId, null, null, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiMatch>>() {
             @Override
             public void onResponse(Call<ApiResponse<ApiMatch>> call, Response<ApiResponse<ApiMatch>> response) {
@@ -118,6 +160,9 @@ public class MatchRepository {
                             combinedDetails.setStadium(apiMatch.getFixture().getVenue().getName());
                         }
                     }
+                    if(combinedDetails.getStatistics() != null && !combinedDetails.getStatistics().isEmpty()){
+                        matchDetailsCache.put(matchId, combinedDetails);
+                    }
                     detailsData.postValue(combinedDetails);
                 }
             }
@@ -125,11 +170,15 @@ public class MatchRepository {
             public void onFailure(Call<ApiResponse<ApiMatch>> call, Throwable t) {}
         });
 
+        // Call 2: Get Statistics
         apiService.getMatchStatistics(matchId, API_KEY, API_HOST).enqueue(new Callback<ApiStatisticsResponse>() {
             @Override
             public void onResponse(Call<ApiStatisticsResponse> call, Response<ApiStatisticsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     combinedDetails.setStatistics(convertApiStatisticsToDomain(response.body().getResponse()));
+                    if(combinedDetails.getEvents() != null && !combinedDetails.getEvents().isEmpty()){
+                        matchDetailsCache.put(matchId, combinedDetails);
+                    }
                     detailsData.postValue(combinedDetails);
                 }
             }
@@ -177,11 +226,22 @@ public class MatchRepository {
 
     public LiveData<List<Match>> getMatchesByDateFromApi(String date) {
         final MutableLiveData<List<Match>> data = new MutableLiveData<>();
+        List<Match> cachedMatches = matchesByDateCache.get(date);
+        if (cachedMatches != null) {
+            Log.d(TAG, "Tải trận đấu ngày " + date + " từ CACHE");
+            data.setValue(cachedMatches);
+            return data;
+        }
+
+        Log.d(TAG, "Tải trận đấu ngày " + date + " từ API");
         apiService.getFixturesByDate(date, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiMatch>>() {
             @Override
             public void onResponse(Call<ApiResponse<ApiMatch>> call, Response<ApiResponse<ApiMatch>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    data.postValue(convertApiMatchesToDomain(response.body().getResponse()));
+                    // --- SỬA LỖI 2: Chỉ xử lý và postValue 1 LẦN ---
+                    List<Match> domainMatches = convertApiMatchesToDomain(response.body().getResponse());
+                    matchesByDateCache.put(date, domainMatches);
+                    data.postValue(domainMatches);
                 } else {
                     data.postValue(null);
                 }
@@ -307,6 +367,16 @@ public class MatchRepository {
 
     public LiveData<List<List<StandingItem>>> getStandings(int leagueId, int season) {
         final MutableLiveData<List<List<StandingItem>>> data = new MutableLiveData<>();
+        final String cacheKey = leagueId + "_" + season;
+
+        List<List<StandingItem>> cachedStandings = standingsCache.get(cacheKey);
+        if (cachedStandings != null) {
+            Log.d(TAG, "Tải BXH " + cacheKey + " từ CACHE");
+            data.setValue(cachedStandings);
+            return data;
+        }
+
+        Log.d(TAG, "Tải BXH " + cacheKey + " từ API");
         apiService.getStandings(leagueId, season, API_KEY, API_HOST).enqueue(new Callback<ApiStandingsResponse>() {
             @Override
             public void onResponse(Call<ApiStandingsResponse> call, Response<ApiStandingsResponse> response) {
@@ -314,9 +384,8 @@ public class MatchRepository {
                         && !response.body().getResponse().isEmpty()
                         && response.body().getResponse().get(0).getLeague() != null
                         && !response.body().getResponse().get(0).getLeague().getStandings().isEmpty()) {
-
-                    // Lấy về toàn bộ danh sách các bảng đấu
                     List<List<StandingItem>> allStandings = response.body().getResponse().get(0).getLeague().getStandings();
+                    standingsCache.put(cacheKey, allStandings);
                     data.postValue(allStandings);
                 } else {
                     data.postValue(null);
@@ -332,11 +401,24 @@ public class MatchRepository {
 
     public LiveData<List<ApiTopScorerData>> getTopScorers(int leagueId, int seasonYear) {
         final MutableLiveData<List<ApiTopScorerData>> data = new MutableLiveData<>();
+        final String cacheKey = leagueId + "_" + seasonYear;
+
+        List<ApiTopScorerData> cachedData = topScorersCache.get(cacheKey);
+        if (cachedData != null) {
+            Log.d(TAG, "Tải Vua phá lưới " + cacheKey + " từ CACHE");
+            data.setValue(cachedData);
+            return data;
+        }
+
+        Log.d(TAG, "Tải Vua phá lưới " + cacheKey + " từ API");
         apiService.getTopScorers(seasonYear, leagueId, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiTopScorerData>>() {
             @Override
             public void onResponse(Call<ApiResponse<ApiTopScorerData>> call, Response<ApiResponse<ApiTopScorerData>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    data.postValue(response.body().getResponse());
+                    // --- SỬA LỖI 2: Chỉ xử lý và postValue 1 LẦN ---
+                    List<ApiTopScorerData> responseData = response.body().getResponse();
+                    topScorersCache.put(cacheKey, responseData);
+                    data.postValue(responseData);
                 } else {
                     data.postValue(new ArrayList<>());
                 }
@@ -441,11 +523,22 @@ public class MatchRepository {
     // ... trong class MatchRepository
     public LiveData<List<ApiLineup>> getLineups(int fixtureId) {
         final MutableLiveData<List<ApiLineup>> data = new MutableLiveData<>();
+        List<ApiLineup> cachedLineups = lineupsCache.get(fixtureId);
+        if (cachedLineups != null) {
+            Log.d(TAG, "Tải đội hình trận " + fixtureId + " từ CACHE");
+            data.setValue(cachedLineups);
+            return data;
+        }
+
+        Log.d(TAG, "Tải đội hình trận " + fixtureId + " từ API");
         apiService.getLineups(fixtureId, API_KEY, API_HOST).enqueue(new Callback<ApiResponse<ApiLineup>>() {
             @Override
             public void onResponse(Call<ApiResponse<ApiLineup>> call, Response<ApiResponse<ApiLineup>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    data.postValue(response.body().getResponse());
+                    // --- SỬA LỖI 2: Chỉ xử lý và postValue 1 LẦN ---
+                    List<ApiLineup> lineupData = response.body().getResponse();
+                    lineupsCache.put(fixtureId, lineupData);
+                    data.postValue(lineupData);
                 } else {
                     data.postValue(null);
                 }
