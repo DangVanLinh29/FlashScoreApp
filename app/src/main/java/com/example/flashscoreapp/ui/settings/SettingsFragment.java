@@ -58,15 +58,19 @@ public class SettingsFragment extends Fragment {
         sessionManager = new SessionManager(requireContext());
 
         // Ánh xạ các view cho tính năng Đăng nhập/Đăng xuất
-        userSection = view.findViewById(R.id.user_section); // Đảm bảo ID này tồn tại trong XML
+        userSection = view.findViewById(R.id.user_section);
         loginStatusText = userSection.findViewById(R.id.text_login_status);
         loginButton = userSection.findViewById(R.id.button_login);
         logoutButton = view.findViewById(R.id.button_logout);
 
         // Ánh xạ các view cho tính năng Chọn Theme
-        textCurrentTheme = view.findViewById(R.id.text_current_theme); // Đảm bảo ID này tồn tại trong XML
-        layoutThemeSetting = view.findViewById(R.id.layout_theme_setting); // Đảm bảo ID này tồn tại trong XML
-
+        textCurrentTheme = view.findViewById(R.id.text_current_theme);
+        layoutThemeSetting = view.findViewById(R.id.layout_theme_setting);
+        View notificationSetting = view.findViewById(R.id.setting_notifications);
+        notificationSetting.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), NotificationSettingsActivity.class);
+            startActivity(intent);
+        });
 
         // --- GÁN SỰ KIỆN CLICK CHO CẢ HAI TÍNH NĂNG ---
 

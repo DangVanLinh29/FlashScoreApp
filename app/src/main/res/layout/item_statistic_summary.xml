@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="8dp">
+    android:paddingVertical="8dp"
+    android:background="@color/surface_background">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -55,6 +56,6 @@
             android:layout_height="match_parent"
             android:layout_weight="37"
             android:background="@drawable/statistic_bar_shape"
-            android:backgroundTint="@color/progress_bar_progress" /> </LinearLayout>
+            android:backgroundTint="@color/progress_bar_progress2" /> </LinearLayout>
 
 </LinearLayout>

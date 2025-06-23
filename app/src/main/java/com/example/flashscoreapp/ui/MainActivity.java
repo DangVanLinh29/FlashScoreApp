@@ -1,5 +1,11 @@
 package com.example.flashscoreapp.ui;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +32,29 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private int currentNavItemId = R.id.navigation_home;
 
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // Người dùng đã cấp quyền
+                } else {
+                    // Người dùng đã từ chối quyền
+                }
+            });
+
+    // 2. Thêm phương thức để hỏi xin quyền
+    private void askNotificationPermission() {
+        // Chỉ chạy trên Android 13 (Tiramisu) trở lên
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                // Quyền đã được cấp
+            } else {
+                // Quyền chưa được cấp, hiển thị hộp thoại xin quyền
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-
+        askNotificationPermission();
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             currentNavItemId = item.getItemId(); // Cập nhật ID của tab được chọn
@@ -68,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             replaceFragment(new HomeFragment());
             toolbar.setTitle("Today's Matches");
         }
+
     }
 
     private void replaceFragment(Fragment fragment) {

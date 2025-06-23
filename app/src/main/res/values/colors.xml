@@ -2,12 +2,28 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="colorPrimary">#5E35B1</color> <color name="colorPrimaryVariant">#4527A0</color>
+    <color name="colorPrimary">#5E35B1</color>
+    <color name="colorPrimaryVariant">#4527A0</color>
     <color name="colorAccent">#5E35B1</color>
     <color name="selected_date_color">#ca0139</color>
-    <color name="backgroudTop">#072640</color>
-    <color name="progress_bar_background">#F0F0F0</color>
-    <color name="progress_bar_progress">#212121</color>
-    <color name="season_date_text">#616161</color>
-    <color name="window_background">#F0F2F5</color> <color name="surface_background">#FFFFFF</color>
+
+    <!-- Gộp các màu từ cả 2 phía -->
+    <color name="backgroudTop">#031320</color>
+    <color name="backgroudDate">#FFFFFF</color>
+    <color name="backgroudTitleLeague">#fff4ce</color>
+
+    <color name="progress_bar_background">#FFFFFF</color>
+    <color name="progress_bar_progress">#FFFFFF</color>
+    <color name="progress_bar_progress2">#ededed</color>
+
+    <color name="season_date_text">#ededed</color>
+
+    <color name="window_background">#ededed</color>
+    <color name="window_background_top">#031320</color>
+    <color name="surface_background">#FFFFFF</color>
+
+    <color name="bottom_nav_background">#FFFFFF</color>
+    <color name="bottom_nav_indicator">#FFFFFF</color>
+    <color name="bottom_nav_item_selected">#ca0139</color>
+    <color name="bottom_nav_item_unselected">#c8c8c8</color>
 </resources>

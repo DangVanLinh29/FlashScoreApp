@@ -30,7 +30,7 @@ public class TeamDetailsViewModel extends AndroidViewModel {
 
         // Lấy Đội hình và Kết quả theo mùa giải được truyền vào
         squad = repository.getPlayersForTeam(teamId, seasonYear);
-        pastMatches = repository.getPastResultsForTeam(teamId, seasonYear);
+        pastMatches = repository.getLastMatchesForTeam(teamId, 30);
 
         // Lấy lịch thi đấu (giữ nguyên)
         upcomingFixtures = repository.getNextFixturesForTeam(teamId, 10);

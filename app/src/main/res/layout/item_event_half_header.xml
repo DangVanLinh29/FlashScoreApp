@@ -4,9 +4,9 @@
     android:id="@+id/text_half_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#F5F5F5"
+    android:background="@color/window_background"
     android:paddingHorizontal="16dp"
     android:paddingVertical="8dp"
-    android:textColor="@android:color/black"
+    android:textColor="?android:attr/textColorPrimary"
     android:textStyle="bold"
     tools:text="HIỆP 1" />

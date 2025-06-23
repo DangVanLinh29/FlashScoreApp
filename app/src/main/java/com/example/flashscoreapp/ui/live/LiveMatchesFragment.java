@@ -131,9 +131,7 @@ public class LiveMatchesFragment extends Fragment implements MatchAdapter.OnItem
         intent.putExtra(TeamDetailsActivity.EXTRA_TEAM, team);
         if (matchContext != null && matchContext.getLeague() != null) {
             intent.putExtra(TeamDetailsActivity.EXTRA_LEAGUE_ID, matchContext.getLeague().getId());
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(matchContext.getMatchTime());
-            intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, cal.get(Calendar.YEAR));
+            intent.putExtra(TeamDetailsActivity.EXTRA_SEASON_YEAR, matchContext.getSeason());
         }
         startActivity(intent);
     }

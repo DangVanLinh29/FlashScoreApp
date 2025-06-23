@@ -15,7 +15,8 @@
             android:id="@+id/toolbar_team_details"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:titleTextColor="@android:color/black" />
+            app:titleTextColor="?android:attr/textColorPrimary"
+            android:background="@color/window_background_top"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -24,7 +25,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="@color/window_background">
 
         <ImageView
             android:id="@+id/image_team_logo"
@@ -48,7 +50,8 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="16dp"
+        android:background="@color/window_background">
 
         <ImageView
             android:layout_width="24dp"
@@ -90,7 +93,8 @@
         android:layout_height="wrap_content"
         app:tabMode="scrollable"
         app:tabIndicatorColor="@color/selected_date_color"
-        app:tabSelectedTextColor="@color/selected_date_color"/>
+        app:tabSelectedTextColor="@color/selected_date_color"
+        android:background="@color/surface_background"/>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager_team"

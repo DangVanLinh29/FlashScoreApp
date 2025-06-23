@@ -14,7 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:paddingTop="25dp"
-            />
+            android:background="@color/window_background_top"
+            app:titleTextColor="?attr/colorOnPrimary" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -30,8 +31,9 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingVertical="16dp">
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:background="@color/window_background">
 
                 <ImageView
                     android:id="@+id/image_favorite_home"
@@ -46,14 +48,15 @@
                     android:id="@+id/image_home_logo_details"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="8dp"
                     app:layout_constraintStart_toEndOf="@id/image_favorite_home"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:src="@tools:sample/avatars"/>
 
+                <!-- *** SỬA Ở ĐÂY *** -->
                 <TextView
                     android:id="@+id/text_home_name_details"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:gravity="center"
@@ -61,7 +64,7 @@
                     app:layout_constraintEnd_toEndOf="@id/image_home_logo_details"
                     app:layout_constraintStart_toStartOf="@id/image_home_logo_details"
                     app:layout_constraintTop_toBottomOf="@id/image_home_logo_details"
-                    tools:text="Manchester United" />
+                    tools:text="Manchester City" />
 
                 <TextView
                     android:id="@+id/text_score_details"
@@ -73,17 +76,17 @@
                     app:layout_constraintEnd_toStartOf="@id/image_away_logo_details"
                     app:layout_constraintTop_toTopOf="@id/image_home_logo_details"
                     app:layout_constraintBottom_toBottomOf="@id/image_home_logo_details"
-                    tools:text="0 - 1"/>
+                    tools:text="6 - 0"/>
 
                 <TextView
                     android:id="@+id/text_status_details"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Kết thúc"
                     android:textSize="12sp"
                     app:layout_constraintTop_toBottomOf="@id/text_score_details"
                     app:layout_constraintStart_toStartOf="@id/text_score_details"
-                    app:layout_constraintEnd_toEndOf="@id/text_score_details"/>
+                    app:layout_constraintEnd_toEndOf="@id/text_score_details"
+                    tools:text="Kết thúc"/>
 
                 <ImageView
                     android:id="@+id/image_favorite_away"
@@ -98,14 +101,15 @@
                     android:id="@+id/image_away_logo_details"
                     android:layout_width="64dp"
                     android:layout_height="64dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="8dp"
                     app:layout_constraintEnd_toStartOf="@id/image_favorite_away"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:src="@tools:sample/avatars"/>
 
+                <!-- *** SỬA Ở ĐÂY *** -->
                 <TextView
                     android:id="@+id/text_away_name_details"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:gravity="center"
@@ -113,7 +117,7 @@
                     app:layout_constraintTop_toBottomOf="@id/image_away_logo_details"
                     app:layout_constraintStart_toStartOf="@id/image_away_logo_details"
                     app:layout_constraintEnd_toEndOf="@id/image_away_logo_details"
-                    tools:text="Arsenal"/>
+                    tools:text="Al Ain"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -124,14 +128,14 @@
                 app:tabMode="scrollable"
                 app:tabIndicatorColor="@color/selected_date_color"
                 app:tabSelectedTextColor="@color/selected_date_color"
-                app:tabTextColor="?android:attr/textColorSecondary" />
+                app:tabTextColor="?android:attr/textColorSecondary"
+                android:background="@color/surface_background" />
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/view_pager_match_details"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-
+                android:layout_height="wrap_content"
+                android:background="@color/surface_background"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

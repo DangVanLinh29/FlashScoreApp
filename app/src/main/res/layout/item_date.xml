@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="12dp"
-    android:background="?attr/selectableItemBackground"
+    android:background="@color/backgroudDate"
     android:minWidth="70dp">
 
     <TextView

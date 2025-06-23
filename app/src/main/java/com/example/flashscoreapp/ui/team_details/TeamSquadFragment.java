@@ -88,18 +88,23 @@ public class TeamSquadFragment extends Fragment {
         groupedMap.put("Defender", new ArrayList<>());
         groupedMap.put("Midfielder", new ArrayList<>());
         groupedMap.put("Attacker", new ArrayList<>());
+        // Thêm một nhóm dự phòng cho các cầu thủ không xác định được vị trí
+        groupedMap.put("Unknown", new ArrayList<>());
 
         for (ApiPlayerResponse playerResponse : players) {
+            String position = null;
             List<ApiPlayerStatistics> statsList = playerResponse.getStatistics();
+            // Kiểm tra xem có dữ liệu thống kê và vị trí hay không
             if (statsList != null && !statsList.isEmpty() && statsList.get(0).getGames() != null) {
-                String position = statsList.get(0).getGames().getPosition();
+                position = statsList.get(0).getGames().getPosition();
+            }
 
-                // Ghi log vị trí của từng cầu thủ để kiểm tra
-                Log.d(TAG, "Cầu thủ: " + playerResponse.getPlayer().getName() + ", Vị trí từ API: " + position);
-
-                if (position != null && groupedMap.containsKey(position)) {
-                    groupedMap.get(position).add(playerResponse);
-                }
+            // Nếu có vị trí và nằm trong các nhóm đã biết thì thêm vào
+            if (position != null && groupedMap.containsKey(position)) {
+                groupedMap.get(position).add(playerResponse);
+            } else {
+                // Nếu không có vị trí, thêm vào nhóm "Unknown"
+                groupedMap.get("Unknown").add(playerResponse);
             }
         }
 
@@ -121,6 +126,10 @@ public class TeamSquadFragment extends Fragment {
                         break;
                     case "Attacker":
                         displayList.add("Tiền đạo");
+                        break;
+                    case "Unknown":
+                        // Nếu nhóm không xác định có cầu thủ, cũng hiển thị họ
+                        displayList.add("Chưa rõ vị trí");
                         break;
                 }
                 displayList.addAll(entry.getValue());

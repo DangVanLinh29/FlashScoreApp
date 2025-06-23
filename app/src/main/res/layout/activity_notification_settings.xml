@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:colorBackground"
+    tools:context=".ui.settings.NotificationSettingsActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_notification_settings"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Thiết lập thông báo" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp"
+                android:text="Bóng đá"
+                android:textStyle="bold"
+                android:textColor="@color/selected_date_color"
+                android:textSize="14sp" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_notify_before_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thông báo trước khi bắt đầu"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_lineups"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đội hình"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_match_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Trận đấu bắt đầu"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_goals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bàn thắng"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_goal_scorers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cầu thủ ghi bàn"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_red_cards"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Thẻ đỏ"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_half_time_score"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tỉ số giữa trận"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_second_half_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bắt đầu hiệp 2"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_final_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kết quả chung cuộc"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switch_reports"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Báo cáo"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
