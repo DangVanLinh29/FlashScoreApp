@@ -109,19 +109,35 @@ public class MatchAdapter extends RecyclerView.Adapter<MatchAdapter.MatchViewHol
 
             textLeftColumn.setTextColor(secondaryTextColor); // Đặt màu mặc định
 
-            if ("NS".equals(status)) { // Trận chưa đá
-                SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+            // Đặt lại màu chữ về mặc định trước khi kiểm tra
+            textLeftColumn.setTextColor(secondaryTextColor);
+
+            // Nếu trận đấu chưa bắt đầu ("NS") hoặc đã kết thúc ("FT")
+            if ("NS".equals(status) || "FT".equals(status)) {
+                // Hiển thị giờ bắt đầu
                 textLeftColumn.setText(timeFormat.format(new Date(match.getMatchTime())));
-                textRightColumn.setText("");
-            } else { // Các trạng thái khác (LIVE, FT, HT...)
+            } else { // Các trạng thái khác (LIVE, HT, POSTPONED...)
+                // Hiển thị mã trạng thái
                 textLeftColumn.setText(status);
-                Score score = match.getScore();
-                if (score != null) {
-                    textRightColumn.setText(score.getHome() + " - " + score.getAway());
-                }
+                // Nếu đang LIVE, đổi màu chữ thành màu đỏ
                 if (isStatusLive(status)) {
                     textLeftColumn.setTextColor(Color.RED);
                 }
+            }
+
+            // Xử lý cột phải (tỉ số)
+            // Chỉ hiển thị tỉ số cho các trận không phải "chưa bắt đầu"
+            if (!"NS".equals(status)) {
+                Score score = match.getScore();
+                if (score != null) {
+                    textRightColumn.setText(score.getHome() + " - " + score.getAway());
+                } else {
+                    textRightColumn.setText("");
+                }
+            } else {
+                textRightColumn.setText("");
             }
 
             // 3. Gán các sự kiện click
